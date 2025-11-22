@@ -31,29 +31,32 @@ const ProductsSection = () => {
   };
 
   return (
-    <section id="productos" className="py-20 bg-secondary">
+    <section id="productos" className="py-24 bg-gradient-to-b from-secondary to-background">
       <div className="container mx-auto px-4">
-        <h2 className="text-4xl md:text-5xl font-bold text-center mb-6 text-primary">
-          Nuestros Productos
-        </h2>
-        <p className="text-lg text-center text-muted-foreground mb-12 max-w-3xl mx-auto">
-          CBD + CBG + Terpenos en Broad Spectrum para uso veterinario
-        </p>
+        <div className="max-w-3xl mx-auto text-center mb-16">
+          <h2 className="text-4xl md:text-6xl font-bold mb-6 text-primary leading-tight">
+            Elige la Mejor Opción
+          </h2>
+          <p className="text-xl text-muted-foreground leading-relaxed">
+            Dos presentaciones diseñadas para adaptarse a las necesidades de tu mascota
+          </p>
+        </div>
 
-        <div className="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto mb-12">
-          {products.map((product) => (
-            <Card key={product.name} className="overflow-hidden hover:shadow-2xl transition-all border-primary/20">
-              <div className="bg-gradient-to-br from-primary/10 to-primary/5 p-8 flex items-center justify-center">
+        <div className="grid md:grid-cols-2 gap-10 max-w-6xl mx-auto mb-16">
+          {products.map((product, index) => (
+            <Card key={product.name} className="overflow-hidden hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 border-primary/10 bg-gradient-to-br from-card to-secondary/20">
+              <div className="bg-gradient-to-br from-primary/5 via-primary/10 to-primary/5 p-12 flex items-center justify-center relative overflow-hidden">
+                <div className="absolute inset-0 bg-gradient-to-br from-transparent via-primary/5 to-transparent animate-pulse" />
                 <img 
                   src={product.image} 
                   alt={product.name}
-                  className="w-48 h-auto object-contain drop-shadow-xl"
+                  className="w-64 h-auto object-contain drop-shadow-2xl relative z-10 hover:scale-105 transition-transform duration-300"
                 />
               </div>
-              <div className="p-8">
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-2xl font-bold text-primary">{product.name}</h3>
-                  <Badge variant="secondary" className="text-sm">
+              <div className="p-10">
+                <div className="flex items-center justify-between mb-6">
+                  <h3 className="text-3xl font-bold text-primary">{product.name}</h3>
+                  <Badge className="text-sm px-3 py-1 bg-primary/10 text-primary border-primary/30 hover:bg-primary/20">
                     Broad Spectrum
                   </Badge>
                 </div>
@@ -81,38 +84,41 @@ const ProductsSection = () => {
                   </div>
                 </div>
 
-                <Badge className="w-full justify-center py-2 bg-accent/10 text-accent border-accent/30 hover:bg-accent/20">
-                  USO VETERINARIO
+                <Badge className="w-full justify-center py-3 text-base bg-gradient-to-r from-accent/20 to-accent/10 text-accent border-accent/30 hover:from-accent/30 hover:to-accent/20 transition-all">
+                  ✓ USO VETERINARIO
                 </Badge>
               </div>
             </Card>
           ))}
         </div>
 
-        <Card className="p-8 max-w-3xl mx-auto bg-primary text-primary-foreground">
-          <h3 className="text-2xl font-bold mb-4 text-center">Opciones de Uso</h3>
-          <div className="grid md:grid-cols-2 gap-6 mb-6">
-            <div>
-              <p className="font-semibold mb-2">Dosis Sugerida</p>
-              <p className="text-primary-foreground/90">0.5 – 2 mg/kg PO</p>
+        <Card className="p-12 max-w-4xl mx-auto bg-gradient-to-br from-primary via-primary to-primary-dark text-primary-foreground shadow-2xl">
+          <h3 className="text-3xl md:text-4xl font-bold mb-8 text-center">Recomendaciones de Uso</h3>
+          <div className="grid md:grid-cols-2 gap-8 mb-8">
+            <div className="bg-primary-foreground/10 backdrop-blur-sm rounded-2xl p-6">
+              <p className="font-bold text-lg mb-3">Dosis Inicial</p>
+              <p className="text-2xl font-bold mb-2">0.5 - 2 mg/kg</p>
+              <p className="text-primary-foreground/80 text-sm">Comenzar siempre con la dosis más baja</p>
             </div>
-            <div>
-              <p className="font-semibold mb-2">Posología</p>
-              <p className="text-primary-foreground/90">Cada 12 horas</p>
+            <div className="bg-primary-foreground/10 backdrop-blur-sm rounded-2xl p-6">
+              <p className="font-bold text-lg mb-3">Frecuencia</p>
+              <p className="text-2xl font-bold mb-2">Cada 12 horas</p>
+              <p className="text-primary-foreground/80 text-sm">Ajustar según respuesta individual</p>
             </div>
           </div>
-          <p className="text-sm text-primary-foreground/80 mb-6">
-            En casos especiales la dosis podría llegar hasta 8mg/kg y ajustarse a cada 8 horas. 
-            Siempre comenzar con la dosis más baja e ir ajustando según los resultados terapéuticos.
-          </p>
+          <div className="bg-primary-foreground/10 backdrop-blur-sm rounded-2xl p-6 mb-8">
+            <p className="text-primary-foreground/90 leading-relaxed text-center">
+              Cada mascota es única. Nuestro equipo te ayudará a encontrar la dosis perfecta 
+              para el bienestar de tu compañero.
+            </p>
+          </div>
           <Button 
             onClick={handleContact}
-            variant="secondary"
             size="lg"
-            className="w-full"
+            className="w-full text-lg py-7 bg-accent hover:bg-accent/90 text-accent-foreground shadow-xl hover:shadow-2xl transition-all hover:scale-105"
           >
-            <Phone className="mr-2 h-5 w-5" />
-            Realizar Pedido
+            <Phone className="mr-3 h-6 w-6" />
+            Realizar Pedido por WhatsApp
           </Button>
         </Card>
       </div>
