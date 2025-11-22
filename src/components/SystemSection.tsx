@@ -3,75 +3,50 @@ import { Brain, Pill, Zap } from "lucide-react";
 
 const SystemSection = () => {
   return (
-    <section id="sistema" className="py-20 bg-secondary">
+    <section id="sistema" className="py-24 bg-gradient-to-b from-secondary to-background">
       <div className="container mx-auto px-4">
-        <h2 className="text-4xl md:text-5xl font-bold text-center mb-6 text-primary">
-          Sistema Endocannabinoide
-        </h2>
-        <p className="text-lg text-center text-muted-foreground mb-12 max-w-4xl mx-auto">
-          El sistema endocannabinoide (SEC) está presente en prácticamente todas las especies animales 
-          y juega un papel fundamental en el manejo del dolor y las emociones.
-        </p>
-
-        <div className="grid md:grid-cols-3 gap-8 mb-16">
-          <Card className="p-8 text-center hover:shadow-lg transition-shadow">
-            <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
-              <Brain className="w-8 h-8 text-primary" />
-            </div>
-            <h3 className="text-xl font-bold mb-3 text-primary">Endocannabinoides</h3>
-            <ul className="text-muted-foreground space-y-2">
-              <li>Anandamida</li>
-              <li>2-AG (2-arquidonil glicerol)</li>
-            </ul>
-          </Card>
-
-          <Card className="p-8 text-center hover:shadow-lg transition-shadow">
-            <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
-              <Pill className="w-8 h-8 text-primary" />
-            </div>
-            <h3 className="text-xl font-bold mb-3 text-primary">Receptores</h3>
-            <ul className="text-muted-foreground space-y-2">
-              <li>CB1</li>
-              <li>CB2</li>
-            </ul>
-          </Card>
-
-          <Card className="p-8 text-center hover:shadow-lg transition-shadow">
-            <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
-              <Zap className="w-8 h-8 text-primary" />
-            </div>
-            <h3 className="text-xl font-bold mb-3 text-primary">Enzimas</h3>
-            <ul className="text-muted-foreground space-y-2">
-              <li>FAAH</li>
-              <li>MAGL</li>
-            </ul>
-          </Card>
+        <div className="max-w-3xl mx-auto text-center mb-16">
+          <h2 className="text-4xl md:text-6xl font-bold mb-6 text-primary leading-tight">
+            Bienestar Natural para tu Mascota
+          </h2>
+          <p className="text-xl text-muted-foreground leading-relaxed">
+            Todos los mamíferos tienen un sistema natural que regula su bienestar. 
+            Los cannabinoides ayudan a <span className="text-primary font-semibold">equilibrar este sistema</span>, 
+            brindando alivio y calidad de vida.
+          </p>
         </div>
 
-        <Card className="p-8 max-w-4xl mx-auto bg-primary/5 border-primary/20">
-          <h3 className="text-2xl font-bold mb-4 text-primary">Tono del SEC</h3>
-          <p className="text-muted-foreground mb-4">
-            La actividad del SEC está determinada por el tono del SEC, que depende del perfil genético único de cada individuo y determina:
-          </p>
-          <ul className="space-y-2 text-muted-foreground">
-            <li className="flex items-start gap-2">
-              <span className="text-primary mt-1">•</span>
-              <span>Producción de endocannabinoides</span>
-            </li>
-            <li className="flex items-start gap-2">
-              <span className="text-primary mt-1">•</span>
-              <span>Eficiencia de FAAH y MAGL</span>
-            </li>
-            <li className="flex items-start gap-2">
-              <span className="text-primary mt-1">•</span>
-              <span>Distribución de receptores CB1 y CB2</span>
-            </li>
-            <li className="flex items-start gap-2">
-              <span className="text-primary mt-1">•</span>
-              <span>Variabilidad de respuesta del paciente frente a los cannabinoides</span>
-            </li>
-          </ul>
-        </Card>
+        <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+          <Card className="p-8 text-center hover:shadow-2xl transition-all hover:-translate-y-2 duration-300 bg-card border-primary/10">
+            <div className="w-20 h-20 bg-gradient-to-br from-primary to-primary-light rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg">
+              <Brain className="w-10 h-10 text-primary-foreground" />
+            </div>
+            <h3 className="text-2xl font-bold mb-4 text-primary">Alivio del Dolor</h3>
+            <p className="text-muted-foreground leading-relaxed">
+              Reduce molestias de forma natural, mejorando la movilidad y el confort de tu mascota.
+            </p>
+          </Card>
+
+          <Card className="p-8 text-center hover:shadow-2xl transition-all hover:-translate-y-2 duration-300 bg-card border-primary/10">
+            <div className="w-20 h-20 bg-gradient-to-br from-primary to-primary-light rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg">
+              <Pill className="w-10 h-10 text-primary-foreground" />
+            </div>
+            <h3 className="text-2xl font-bold mb-4 text-primary">Calma & Equilibrio</h3>
+            <p className="text-muted-foreground leading-relaxed">
+              Ayuda a reducir la ansiedad y el estrés, promoviendo un estado emocional más estable.
+            </p>
+          </Card>
+
+          <Card className="p-8 text-center hover:shadow-2xl transition-all hover:-translate-y-2 duration-300 bg-card border-primary/10">
+            <div className="w-20 h-20 bg-gradient-to-br from-primary to-primary-light rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg">
+              <Zap className="w-10 h-10 text-primary-foreground" />
+            </div>
+            <h3 className="text-2xl font-bold mb-4 text-primary">Vitalidad</h3>
+            <p className="text-muted-foreground leading-relaxed">
+              Mejora el apetito, la energía y la calidad de vida general de tu compañero.
+            </p>
+          </Card>
+        </div>
       </div>
     </section>
   );
