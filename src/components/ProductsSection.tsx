@@ -1,15 +1,14 @@
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import product750 from "@/assets/product-750.png";
-import product1500 from "@/assets/product-1500.png";
+import productImage from "@/assets/product-hero.png";
 import { Phone } from "lucide-react";
 
 const ProductsSection = () => {
   const products = [
     {
       name: "SINERGIA 750",
-      image: product750,
+      image: productImage,
       concentration: "25 mg/ml",
       cbd: "25 mg/ml de CBD",
       cbg: "0.5 mg/ml de CBG",
@@ -18,7 +17,7 @@ const ProductsSection = () => {
     },
     {
       name: "SINERGIA 1500",
-      image: product1500,
+      image: productImage,
       concentration: "50 mg/ml",
       cbd: "50 mg/ml de CBD",
       cbg: "1 mg/ml de CBG",
