@@ -26,6 +26,7 @@ const InteractionsSection = () => {
               <br className="hidden md:block" />
               Tu mascota merece el mejor cuidado natural.
             </p>
+            <br />
           </div>
         </Card>
       </div>

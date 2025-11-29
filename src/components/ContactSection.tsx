@@ -9,7 +9,7 @@ const ContactSection = () => {
       <div className="container mx-auto px-4">
         <div className="max-w-3xl mx-auto text-center mb-12">
           <h2 className="text-4xl md:text-6xl font-bold mb-6 text-primary leading-tight">
-            Hagamos SINERGIA
+            Hagamos <span className="text-primary font-normal">SINERGIA</span>
           </h2>
           <p className="text-xl text-muted-foreground leading-relaxed">
             ¿Tienes dudas? Estamos aquí para asesorarte
@@ -17,13 +17,7 @@ const ContactSection = () => {
         </div>
 
         <Card className="max-w-3xl mx-auto p-12 text-center shadow-2xl bg-gradient-to-br from-card to-secondary/30">
-          <div className="bg-gradient-to-br from-primary/10 to-primary/5 rounded-2xl p-6 inline-block mb-8">
-            <img 
-              src={logoImage} 
-              alt="Sinergia by Botican" 
-              className="w-40 h-auto"
-            />
-          </div>
+
 
           <div className="space-y-6 mb-10">
             <div className="flex items-center justify-center gap-6 text-foreground bg-primary/5 rounded-2xl p-6 hover:bg-primary/10 transition-colors">

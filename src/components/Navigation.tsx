@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
-import logoImage from "@/assets/logo-white.png";
+import logoImageWhite from "@/assets/logo-white.png";
+import logoImageBlack from "@/assets/logo-black.png";
 
 const Navigation = () => {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -18,7 +19,6 @@ const Navigation = () => {
   };
 
   const navItems = [
-    { label: "Inicio", id: "inicio" },
     { label: "Sistema Endocannabinoide", id: "sistema" },
     { label: "Fitocannabinoides", id: "fitocannabinoides" },
     { label: "Productos", id: "productos" },
@@ -39,10 +39,7 @@ const Navigation = () => {
             className="flex items-center gap-3 cursor-pointer"
             onClick={() => scrollToSection("inicio")}
           >
-            <img src={logoImage} alt="Sinergia" className="h-12 w-auto" />
-            <span className={`font-bold text-xl ${isScrolled ? "text-primary" : "text-primary-foreground"}`}>
-              SINERGIA
-            </span>
+            <img src={isScrolled ? logoImageBlack : logoImageWhite} alt="Sinergia" className="h-40 w-auto my-auto" />
           </div>
 
           <div className="hidden md:flex items-center gap-8">
