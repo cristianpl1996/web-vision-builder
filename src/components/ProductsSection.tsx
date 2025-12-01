@@ -1,12 +1,31 @@
 import { Card } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import productImage750 from "@/assets/product-750.png";
-import productImage1500 from "@/assets/product-1500.png";
-import { Phone } from "lucide-react";
+import productImage1500 from "@/assets/Sinergia_1500mg.png";
+import productImage1000 from "@/assets/Sinergia_1000mg.png";
+import productImage750 from "@/assets/Sinergia_750mg.png";
+import productImage500 from "@/assets/Sinergia_500mg.png";
+import productImage250 from "@/assets/Sinergia_250mg.png";
 
 const ProductsSection = () => {
   const products = [
+    {
+      name: "SINERGIA 250",
+      image: productImage250,
+      concentration: "25 mg/ml",
+      cbd: "25 mg/ml de CBD",
+      cbg: "0.5 mg/ml de CBG",
+      content: "250 mg total",
+      volume: "10 ml",
+    },
+    {
+      name: "SINERGIA 500",
+      image: productImage500,
+      concentration: "25 mg/ml",
+      cbd: "25 mg/ml de CBD",
+      cbg: "0.5 mg/ml de CBG",
+      content: "500 mg total",
+      volume: "20 ml",
+    },
     {
       name: "SINERGIA 750",
       image: productImage750,
@@ -17,19 +36,24 @@ const ProductsSection = () => {
       volume: "30 ml",
     },
     {
+      name: "SINERGIA 1000",
+      image: productImage1000,
+      concentration: "50 mg/ml",
+      cbd: "50 mg/ml de CBD",
+      cbg: "1 mg/ml de CBG",
+      content: "1000 mg total",
+      volume: "40 ml",
+    },
+    {
       name: "SINERGIA 1500",
       image: productImage1500,
       concentration: "50 mg/ml",
       cbd: "50 mg/ml de CBD",
       cbg: "1 mg/ml de CBG",
       content: "1500 mg total",
-      volume: "30 ml",
+      volume: "60 ml",
     },
   ];
-
-  const handleContact = () => {
-    window.open("https://wa.me/525548993902", "_blank");
-  };
 
   return (
     <section id="productos" className="py-24 bg-gradient-to-b from-secondary to-background">
@@ -39,26 +63,26 @@ const ProductsSection = () => {
             Elige la Mejor Opción
           </h2>
           <p className="text-xl text-muted-foreground leading-relaxed">
-            Dos presentaciones diseñadas para adaptarse a las necesidades de tu mascota
+            Cinco presentaciones diseñadas para adaptarse a las necesidades de tu mascota
           </p>
         </div>
 
-        <div className="grid md:grid-cols-2 gap-10 max-w-6xl mx-auto mb-16">
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-7xl mx-auto mb-16">
           {products.map((product, index) => (
             <Card key={product.name} className="overflow-hidden hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 border-primary/10 bg-gradient-to-br from-card to-secondary/20">
-              <div className="bg-gradient-to-br from-primary/5 via-primary/10 to-primary/5 p-12 flex items-center justify-center relative overflow-hidden">
+              <div className="bg-gradient-to-br from-primary/5 via-primary/10 to-primary/5 p-8 flex items-center justify-center relative overflow-hidden">
                 <div className="absolute inset-0 bg-gradient-to-br from-transparent via-primary/5 to-transparent animate-pulse" />
                 <img 
                   src={product.image} 
                   alt={product.name}
-                  className="w-64 h-auto object-contain drop-shadow-2xl relative z-10 hover:scale-105 transition-transform duration-300"
+                  className="w-48 lg:w-56 h-auto object-contain drop-shadow-2xl relative z-10 hover:scale-105 transition-transform duration-300"
                 />
               </div>
-              <div className="p-10">
-                <div className="flex items-center justify-between mb-6">
-                  <h3 className="text-3xl font-bold text-primary">{product.name}</h3>
+              <div className="p-6 lg:p-8">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-2xl lg:text-3xl font-bold text-primary">{product.name}</h3>
                   <Badge className="text-sm px-3 py-1 bg-primary/10 text-primary border-primary/30 hover:bg-primary/20">
-                    Broad Spectrum
+                  CBD/CBG
                   </Badge>
                 </div>
                 
@@ -88,36 +112,6 @@ const ProductsSection = () => {
             </Card>
           ))}
         </div>
-
-        <Card className="p-12 max-w-4xl mx-auto bg-white border  shadow-2xl">
-          <h3 className="text-3xl md:text-4xl font-bold mb-8 text-center text-primary">Recomendaciones de Uso</h3>
-          <div className="grid md:grid-cols-2 gap-8 mb-8">
-            <div className="bg-gradient-to-br from-green-100/60 via-green-200/70 to-transparent rounded-2xl p-6 border border-primary/10">
-              <p className="font-bold text-lg mb-3 text-primary">Dosis Inicial</p>
-              <p className="text-2xl font-bold mb-2 text-green-800">0.5 - 2 mg/kg</p>
-              <p className="text-primary/80 text-sm">Comenzar siempre con la dosis más baja</p>
-            </div>
-            <div className="bg-gradient-to-br from-green-100/60 via-green-200/70 to-transparent rounded-2xl p-6 border border-primary/10">
-              <p className="font-bold text-lg mb-3 text-primary">Frecuencia</p>
-              <p className="text-2xl font-bold mb-2 text-green-800">Cada 12 horas</p>
-              <p className="text-primary/80 text-sm">Ajustar según respuesta individual</p>
-            </div>
-          </div>
-          <div className="bg-gradient-to-br from-green-100/60 via-green-200/70 to-transparent rounded-2xl p-6 mb-8 border border-primary/10">
-            <p className="text-primary/90 leading-relaxed">
-              Cada mascota es única. Nuestro equipo te ayudará a encontrar la dosis perfecta 
-              para el bienestar de tu compañero.
-            </p>
-          </div>
-          <Button 
-            onClick={handleContact}
-            size="lg"
-            className="w-full text-lg py-6 px-8 bg-primary hover:bg-primary/90 shadow-xl hover:shadow-2xl transition-all hover:scale-105"
-          >
-            <Phone className="mr-3 h-6 w-6" />
-            Realizar Pedido por WhatsApp
-          </Button>
-        </Card>
       </div>
     </section>
   );
