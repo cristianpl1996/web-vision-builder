@@ -26,7 +26,7 @@ export const PAYMENT_METHODS: PaymentMethod[] = [
   {
     id: "card",
     label: "Tarjeta de crédito o débito",
-    description: "Visa, Mastercard y American Express. Pago 100% seguro.",
+    description: "Pago en línea con tarjeta.",
     enabled: false, // ← enable once the gateway is connected
     start: async () => {
       throw new Error("Pasarela de pago aún no configurada.");
@@ -34,8 +34,8 @@ export const PAYMENT_METHODS: PaymentMethod[] = [
   },
   {
     id: "manual",
-    label: "Transferencia o depósito",
-    description: "Confirma tu pedido, envíanoslo por WhatsApp y te compartimos los datos de pago.",
+    label: "Pago coordinado por WhatsApp",
+    description: "Al enviarnos tu pedido por WhatsApp te confirmamos el precio, el envío y las opciones de pago.",
     enabled: true,
     start: async () => ({ type: "done" }),
   },

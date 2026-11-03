@@ -4,7 +4,6 @@
  * never trust prices sent by the browser.
  */
 import type { Address } from "@/services/auth";
-import type { ShippingOptionId } from "@/data/products";
 import { readStorage, writeStorage } from "@/lib/format";
 
 export type OrderStatus = "pending_payment" | "paid" | "shipped" | "delivered" | "cancelled";
@@ -12,7 +11,7 @@ export type OrderStatus = "pending_payment" | "paid" | "shipped" | "delivered" |
 export interface OrderItem {
   productId: string;
   name: string;
-  price: number;
+  price: number | null;
   quantity: number;
   image: string;
 }
@@ -23,10 +22,10 @@ export interface Order {
   userId: string;
   email: string;
   items: OrderItem[];
-  subtotal: number;
-  shipping: number;
-  total: number;
-  shippingOption: ShippingOptionId;
+  /** `null` while prices and shipping are confirmed by WhatsApp. */
+  subtotal: number | null;
+  shipping: number | null;
+  total: number | null;
   address: Address;
   paymentMethod: string;
   status: OrderStatus;

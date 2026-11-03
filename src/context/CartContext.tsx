@@ -1,6 +1,6 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useReducer, useState, type ReactNode } from "react";
 import { toast } from "sonner";
-import { getProductById, STORE, type Product } from "@/data/products";
+import { getProductById, type Product } from "@/data/products";
 import { readStorage, writeStorage } from "@/lib/format";
 
 export interface CartLine {
@@ -51,8 +51,8 @@ function reducer(state: CartLine[], action: Action): CartLine[] {
 interface CartContextValue {
   lines: CartLineDetailed[];
   count: number;
+  /** Sum of known prices (0 while prices are pending). */
   subtotal: number;
-  freeShippingRemaining: number;
   isOpen: boolean;
   bump: number;
   open: () => void;
@@ -89,14 +89,13 @@ export function CartProvider({ children }: { children: ReactNode }) {
     () =>
       state.flatMap((l) => {
         const product = getProductById(l.productId);
-        return product ? [{ ...l, product, lineTotal: product.price * l.quantity }] : [];
+        return product ? [{ ...l, product, lineTotal: (product.price ?? 0) * l.quantity }] : [];
       }),
     [state],
   );
 
   const count = lines.reduce((n, l) => n + l.quantity, 0);
   const subtotal = lines.reduce((n, l) => n + l.lineTotal, 0);
-  const freeShippingRemaining = Math.max(0, STORE.freeShippingThreshold - subtotal);
 
   const add = useCallback<CartContextValue["add"]>((productId, quantity = 1, opts) => {
     const product = getProductById(productId);
@@ -122,7 +121,6 @@ export function CartProvider({ children }: { children: ReactNode }) {
     lines,
     count,
     subtotal,
-    freeShippingRemaining,
     isOpen,
     bump,
     open: () => setOpen(true),

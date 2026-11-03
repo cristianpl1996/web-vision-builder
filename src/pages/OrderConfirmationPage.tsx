@@ -41,17 +41,15 @@ export default function OrderConfirmationPage() {
   const waText = encodeURIComponent(
     [
       `Hola, quiero confirmar mi pedido ${order.number}:`,
-      ...order.items.map((i) => `- ${i.quantity} x ${i.name} (${formatPrice(i.price * i.quantity)})`),
-      `Subtotal: ${formatPrice(order.subtotal)}`,
-      `Envío: ${order.shipping === 0 ? "Gratis" : formatPrice(order.shipping)}`,
-      `Total: ${formatPrice(order.total)}`,
+      ...order.items.map((i) => `- ${i.quantity} x ${i.name}${i.price === null ? "" : ` (${formatPrice(i.price * i.quantity)})`}`),
+      order.total === null ? "" : `Total productos: ${formatPrice(order.total)}`,
       "",
       `Enviar a: ${a.fullName}, tel. ${a.phone}`,
       `${a.street} ${a.extNumber}${a.intNumber ? ` int. ${a.intNumber}` : ""}, col. ${a.neighborhood}, ${a.city}, ${a.state}, C.P. ${a.postalCode}`,
       a.references ? `Referencias: ${a.references}` : "",
       `Correo: ${order.email}`,
       "",
-      "¿Me comparten los datos de pago?",
+      order.total === null ? "¿Me confirman el precio, el envío y las opciones de pago?" : "¿Me confirman el envío y las opciones de pago?",
     ]
       .filter((l, idx, arr) => l !== "" || arr[idx - 1] !== "")
       .join("\n"),
@@ -72,7 +70,7 @@ export default function OrderConfirmationPage() {
           <div className="mt-8 rounded-3xl border border-primary/20 bg-secondary p-6 text-center">
             <p className="font-semibold">Último paso: envíanos tu pedido por WhatsApp</p>
             <p className="mt-1 text-sm text-muted-foreground">
-              Te abrimos el mensaje con tu pedido listo. Solo envíalo y te compartimos los datos de pago y el envío.
+              Te abrimos el mensaje con tu pedido listo. Solo envíalo y te confirmamos el precio, el pago y el envío.
             </p>
             <Button asChild size="lg" className="mt-4 bg-[#25D366] text-white hover:bg-[#1fb857] hover:shadow-none">
               <a href={`https://wa.me/${STORE.whatsapp}?text=${waText}`} target="_blank" rel="noopener noreferrer">
@@ -92,14 +90,15 @@ export default function OrderConfirmationPage() {
               <li key={i.productId} className="flex items-center gap-4 py-4">
                 <img src={i.image} alt="" width={56} height={56} className="h-14 w-14 rounded-xl border bg-white object-contain" />
                 <span className="flex-1 font-medium">{i.name} <span className="text-muted-foreground">× {i.quantity}</span></span>
-                <span className="price font-semibold">{formatPrice(i.price * i.quantity)}</span>
+                {i.price !== null && <span className="price font-semibold">{formatPrice(i.price * i.quantity)}</span>}
               </li>
             ))}
           </ul>
           <dl className="space-y-2 border-t pt-4 text-sm">
-            <div className="flex justify-between"><dt className="text-muted-foreground">Subtotal</dt><dd className="price">{formatPrice(order.subtotal)}</dd></div>
-            <div className="flex justify-between"><dt className="text-muted-foreground">Envío</dt><dd className="price">{order.shipping === 0 ? "Gratis" : formatPrice(order.shipping)}</dd></div>
-            <div className="flex justify-between pt-2 text-base"><dt className="font-semibold">Total</dt><dd className="price text-xl font-bold">{formatPrice(order.total)}</dd></div>
+            {order.total !== null && (
+              <div className="flex justify-between text-base"><dt className="font-semibold">Total productos</dt><dd className="price text-xl font-bold">{formatPrice(order.total)}</dd></div>
+            )}
+            <div className="flex justify-between gap-4"><dt className="text-muted-foreground">{order.total === null ? "Precio y envío" : "Envío"}</dt><dd className="text-right">Por confirmar en WhatsApp</dd></div>
           </dl>
           <div className="mt-6 rounded-2xl bg-muted p-4 text-sm">
             <p className="font-semibold">Enviar a</p>

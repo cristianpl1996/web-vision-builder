@@ -1,13 +1,13 @@
 import { useEffect, useState } from "react";
 import { Link, Navigate, useNavigate, useParams } from "react-router-dom";
-import { ChevronRight, ShoppingBag, Zap, Truck, PawPrint, Leaf, Check } from "lucide-react";
+import { ChevronRight, ShoppingBag, Zap, MessageCircle, PawPrint, Leaf, Check } from "lucide-react";
 import { SiteLayout } from "@/components/layout/SiteLayout";
 import { Button } from "@/components/ui/button";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { QuantityStepper } from "@/components/cart/QuantityStepper";
 import { ProductCard } from "@/components/product/ProductCard";
 import { describeProduct, getProductBySlug, PRODUCTS, STORE, TIER_LABEL } from "@/data/products";
-import { formatPrice, formatPricePrecise } from "@/lib/format";
+import { formatPrice, formatPricePrecise, priceOrQuote } from "@/lib/format";
 import { useCart } from "@/context/CartContext";
 import { useAuth } from "@/context/AuthContext";
 import { cn } from "@/lib/utils";
@@ -90,15 +90,18 @@ export default function ProductPage() {
             <h1 className="mt-3 font-display text-4xl font-medium leading-tight sm:text-5xl">{product.name}</h1>
             <p className="mt-4 text-lg leading-relaxed text-muted-foreground">{describeProduct(product)}</p>
 
-            <div className="mt-6 flex items-end gap-3">
-              <span className="price text-4xl font-bold">{formatPrice(product.price)}</span>
-              {product.compareAtPrice && (
-                <span className="price pb-1 text-lg text-muted-foreground line-through">{formatPrice(product.compareAtPrice)}</span>
-              )}
-              <span className="price pb-1.5 text-sm text-muted-foreground">
-                {STORE.currency} · {formatPricePrecise(product.price / product.totalMg)} por mg
-              </span>
-            </div>
+            {product.price === null ? (
+              <p className="mt-6 inline-flex items-center gap-2 rounded-full bg-secondary px-4 py-2 font-semibold text-primary">
+                <MessageCircle className="h-4 w-4" /> Precio por WhatsApp
+              </p>
+            ) : (
+              <div className="mt-6 flex items-end gap-3">
+                <span className="price text-4xl font-bold">{formatPrice(product.price)}</span>
+                <span className="price pb-1.5 text-sm text-muted-foreground">
+                  {STORE.currency} · {formatPricePrecise(product.price / product.totalMg)} por mg
+                </span>
+              </div>
+            )}
 
             <div className="mt-8">
               <p className="mb-3 text-sm font-semibold">
@@ -134,7 +137,7 @@ export default function ProductPage() {
             </Button>
 
             <ul className="mt-8 grid gap-3 rounded-3xl bg-secondary/70 p-5 text-sm sm:grid-cols-3">
-              <li className="flex items-center gap-2"><Truck className="h-4 w-4 text-primary" /> Envío gratis desde {formatPrice(STORE.freeShippingThreshold)}</li>
+              <li className="flex items-center gap-2"><MessageCircle className="h-4 w-4 text-primary" /> Asesoría por WhatsApp</li>
               <li className="flex items-center gap-2"><Leaf className="h-4 w-4 text-primary" /> CBD + CBG + Terpenos</li>
               <li className="flex items-center gap-2"><PawPrint className="h-4 w-4 text-primary" /> Uso veterinario</li>
             </ul>
@@ -163,13 +166,6 @@ export default function ProductPage() {
                   </ul>
                 </AccordionContent>
               </AccordionItem>
-              <AccordionItem value="envios">
-                <AccordionTrigger className="text-base font-semibold hover:no-underline">Envíos y devoluciones</AccordionTrigger>
-                <AccordionContent className="text-base leading-relaxed text-muted-foreground">
-                  {STORE.shippingOptions.map((o) => `${o.label}: ${o.eta}`).join(" · ")}. Envío
-                  gratis en compras desde {formatPrice(STORE.freeShippingThreshold)}.
-                </AccordionContent>
-              </AccordionItem>
             </Accordion>
           </div>
         </div>
@@ -189,7 +185,7 @@ export default function ProductPage() {
         <div className="flex items-center gap-3">
           <div className="min-w-0 flex-1">
             <p className="truncate text-sm font-semibold">{product.name}</p>
-            <p className="price text-lg font-bold">{formatPrice(product.price * qty)}</p>
+            <p className={product.price === null ? "text-sm font-semibold text-primary" : "price text-lg font-bold"}>{product.price === null ? priceOrQuote(null) : formatPrice(product.price * qty)}</p>
           </div>
           <Button size="lg" onClick={() => add(product.id, qty)}>
             <ShoppingBag /> Agregar

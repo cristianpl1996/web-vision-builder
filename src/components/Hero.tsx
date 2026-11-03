@@ -3,11 +3,12 @@ import { Button } from "@/components/ui/button";
 import heroImage from "@/assets/hero-bg.webp";
 import heroImageSm from "@/assets/hero-bg-sm.webp";
 import { PRODUCTS } from "@/data/products";
-import { formatPrice } from "@/lib/format";
+import { formatPrice, priceOrQuote } from "@/lib/format";
 import { useCart } from "@/context/CartContext";
 
 const featured = PRODUCTS.find((p) => p.featured) ?? PRODUCTS[2];
-const fromPrice = Math.min(...PRODUCTS.map((p) => p.price));
+const prices = PRODUCTS.map((p) => p.price).filter((v): v is number => v !== null);
+const fromPrice = prices.length === PRODUCTS.length ? Math.min(...prices) : null;
 
 /**
  * One continuous wash: near-black green on the left that keeps turning green
@@ -19,7 +20,7 @@ const DESKTOP_WASH = [
 ].join(",");
 
 const MOBILE_WASH = [
-  "linear-gradient(180deg, hsl(155 65% 5% / 0.6) 0%, hsl(153 55% 18% / 0.25) 18%, hsl(153 58% 14% / 0.55) 32%, hsl(155 62% 9% / 0.94) 44%, hsl(155 65% 7%) 54%)",
+  "linear-gradient(180deg, hsl(155 65% 5% / 0.7) 0%, hsl(154 60% 9% / 0.6) 20%, hsl(154 62% 8% / 0.82) 34%, hsl(155 62% 7% / 0.96) 46%, hsl(155 65% 7%) 54%)",
 ].join(",");
 
 const Hero = () => {
@@ -36,7 +37,7 @@ const Hero = () => {
       <div aria-hidden className="absolute inset-0 -z-10 md:hidden" style={{ backgroundImage: MOBILE_WASH }} />
       <div aria-hidden className="absolute inset-0 -z-10 hidden md:block" style={{ backgroundImage: DESKTOP_WASH }} />
 
-      <div className="container grid items-end gap-8 pb-8 pt-[42vw] md:min-h-[560px] md:items-center md:pb-12 md:pt-24 lg:min-h-[min(max(600px,34vw),680px)] lg:grid-cols-12">
+      <div className="container grid items-end gap-8 pb-8 pt-[96px] md:min-h-[560px] md:items-center md:pb-12 md:pt-24 lg:min-h-[min(max(600px,34vw),680px)] lg:grid-cols-12">
         {/* Copy */}
         <div className="lg:col-span-6">
           <span className="inline-flex animate-fade-up items-center gap-2 rounded-full border border-white/25 bg-white/10 px-3 py-1.5 text-xs font-semibold tracking-wide backdrop-blur-md">
@@ -58,7 +59,7 @@ const Hero = () => {
 
           <div className="mt-8 flex animate-fade-up flex-col gap-3 [animation-delay:240ms] sm:flex-row">
             <Button size="xl" variant="light" onClick={() => scrollTo("productos")} className="w-full sm:w-auto">
-              Comprar desde {formatPrice(fromPrice)} <ArrowRight />
+              {fromPrice === null ? "Ver presentaciones" : `Comprar desde ${formatPrice(fromPrice)}`} <ArrowRight />
             </Button>
             <Button size="xl" variant="glass" onClick={() => scrollTo("beneficios")} className="w-full sm:w-auto">
               Conoce los beneficios
@@ -107,7 +108,7 @@ const Hero = () => {
                       {featured.concentration} · {featured.volume}
                     </p>
                   </div>
-                  <p className="price text-2xl font-bold">{formatPrice(featured.price)}</p>
+                  <p className={featured.price === null ? "text-right text-xs font-semibold leading-tight text-white/80" : "price text-2xl font-bold"}>{priceOrQuote(featured.price)}</p>
                 </div>
                 <Button variant="light" size="lg" className="mt-4 w-full" onClick={() => add(featured.id)}>
                   <ShoppingBag /> Agregar al carrito

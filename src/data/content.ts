@@ -25,12 +25,8 @@ export const FAQS = [
     a: "Puedes navegar y armar tu carrito libremente. Solo te pediremos iniciar sesión o crear tu cuenta al finalizar la compra, para que puedas consultar tus pedidos y guardar tus direcciones.",
   },
   {
-    q: "¿Cómo se realiza el envío?",
-    a: "Al finalizar tu compra eliges envío estándar o express y te mostramos el costo antes de confirmar. El envío estándar es gratis a partir del monto indicado en el carrito.",
-  },
-  {
-    q: "¿Qué métodos de pago aceptan?",
-    a: "Por ahora, transferencia o depósito: al confirmar tu pedido nos lo envías por WhatsApp y te compartimos los datos de pago. Muy pronto también podrás pagar con tarjeta en línea.",
+    q: "¿Cómo hago mi pedido?",
+    a: "Agrega al carrito las presentaciones que necesitas, crea tu cuenta y confirma tu dirección. Al final nos envías el pedido por WhatsApp y te confirmamos el precio, el envío y las opciones de pago.",
   },
 ];
 

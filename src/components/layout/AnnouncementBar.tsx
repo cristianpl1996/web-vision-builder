@@ -1,16 +1,14 @@
-import { Truck, PawPrint, Leaf } from "lucide-react";
-import { STORE } from "@/data/products";
-import { formatPrice } from "@/lib/format";
+import { PawPrint, Leaf, MessageCircle } from "lucide-react";
 
 const items = [
-  { icon: Truck, text: `Envío gratis en compras desde ${formatPrice(STORE.freeShippingThreshold)}` },
+  { icon: MessageCircle, text: "Asesoría y pedidos por WhatsApp" },
   { icon: Leaf, text: "CBD + CBG + Terpenos · Broad Spectrum" },
   { icon: PawPrint, text: "Uso veterinario para perros y gatos" },
 ];
 
 export function AnnouncementBar() {
   return (
-    <div className="relative z-[60] overflow-hidden bg-primary-dark text-primary-foreground">
+    <div className="relative z-40 overflow-hidden bg-primary-dark text-primary-foreground">
       {/* Mobile: auto-scrolling marquee. Desktop: static row */}
       <div className="flex h-9 items-center md:hidden" aria-label="Avisos">
         <div className="flex w-max animate-marquee gap-10 whitespace-nowrap px-5 text-xs font-medium">

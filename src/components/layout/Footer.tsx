@@ -9,9 +9,9 @@ export function Footer() {
       <div className="border-b border-white/10">
         <div className="container grid gap-6 py-8 sm:grid-cols-3">
           {[
-            { icon: Truck, title: "Envío a domicilio", text: "Estándar y express" },
+            { icon: Truck, title: "Pedidos en línea", text: "Arma tu carrito y envíalo" },
             { icon: ShieldCheck, title: "Cuenta personal", text: "Consulta tus pedidos cuando quieras" },
-            { icon: CreditCard, title: "Pago sencillo", text: "Transferencia o depósito" },
+            { icon: CreditCard, title: "Atención por WhatsApp", text: "Te confirmamos pago y envío" },
           ].map(({ icon: Icon, title, text }) => (
             <div key={title} className="flex items-center gap-4">
               <div className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-white/10">

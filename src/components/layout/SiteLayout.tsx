@@ -38,7 +38,7 @@ export function SiteLayout({ children, minimal = false, fabRaised = false, hideF
       </a>
       <ScrollManager />
       {import.meta.env.VITE_DEMO === "1" && (
-        <div role="note" className="relative z-[61] bg-accent px-4 py-2 text-center text-xs font-semibold text-accent-foreground">
+        <div role="note" className="relative z-40 bg-accent px-4 py-2 text-center text-xs font-semibold text-accent-foreground">
           Versión de demostración: los pedidos y cuentas son de prueba y no se procesan pagos.
         </div>
       )}

@@ -80,7 +80,7 @@ export default function AccountPage() {
                       </span>
                     </div>
                     <div className="mt-4 flex items-center justify-between border-t pt-4">
-                      <span className="price text-lg font-bold">{formatPrice(o.total)}</span>
+                      <span className="price text-lg font-bold">{o.total === null ? `${o.items.reduce((n, i) => n + i.quantity, 0)} productos` : formatPrice(o.total)}</span>
                       <Button size="sm" variant="outline" onClick={() => reorder(o)}>
                         <RotateCcw /> Volver a comprar
                       </Button>

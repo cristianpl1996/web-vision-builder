@@ -4,8 +4,8 @@ import { Sheet, SheetContent, SheetTitle, SheetDescription } from "@/components/
 import { Button } from "@/components/ui/button";
 import { useCart } from "@/context/CartContext";
 import { useAuth } from "@/context/AuthContext";
-import { PRODUCTS } from "@/data/products";
-import { formatPrice } from "@/lib/format";
+import { PRICES_READY, PRODUCTS } from "@/data/products";
+import { formatPrice, priceOrQuote } from "@/lib/format";
 import { QuantityStepper } from "./QuantityStepper";
 
 export function CartDrawer() {
@@ -85,7 +85,7 @@ export function CartDrawer() {
                       </div>
                       <div className="mt-auto flex items-center justify-between pt-2">
                         <QuantityStepper size="sm" value={quantity} onChange={(q) => setQuantity(product.id, q)} min={1} />
-                        <span className="price font-semibold">{formatPrice(lineTotal)}</span>
+                        {PRICES_READY && <span className="price font-semibold">{formatPrice(lineTotal)}</span>}
                       </div>
                     </div>
                   </li>
@@ -100,7 +100,7 @@ export function CartDrawer() {
                       <div key={p.id} className="flex flex-col rounded-2xl border bg-card p-3">
                         <img src={p.image} alt={p.name} loading="lazy" width={120} height={120} className="mx-auto h-24 w-24 object-contain" />
                         <p className="mt-2 text-sm font-semibold leading-tight">{p.name}</p>
-                        <p className="price text-sm text-muted-foreground">{formatPrice(p.price)}</p>
+                        <p className="price text-sm text-muted-foreground">{priceOrQuote(p.price)}</p>
                         <Button size="sm" variant="outline" className="mt-2 w-full" onClick={() => add(p.id, 1, { openDrawer: false })}>
                           Agregar
                         </Button>
@@ -113,11 +113,11 @@ export function CartDrawer() {
 
             <div className="border-t bg-background p-5 pb-safe shadow-[0_-8px_24px_-12px_hsl(var(--foreground)/0.12)]">
               <div className="flex items-baseline justify-between">
-                <span className="text-sm text-muted-foreground">Subtotal</span>
-                <span className="price text-xl font-bold">{formatPrice(subtotal)}</span>
+                <span className="text-sm text-muted-foreground">{PRICES_READY ? "Subtotal" : "Productos"}</span>
+                <span className="price text-xl font-bold">{PRICES_READY ? formatPrice(subtotal) : count}</span>
               </div>
               <p className="mt-1 flex items-center gap-1.5 text-xs text-muted-foreground">
-                <Info className="h-3.5 w-3.5 shrink-0" aria-hidden /> Envío e impuestos calculados en el checkout.
+                <Info className="h-3.5 w-3.5 shrink-0" aria-hidden /> {PRICES_READY ? "Envío por confirmar al enviar tu pedido." : "Precio y envío te los confirmamos por WhatsApp."}
               </p>
               <Button size="xl" className="mt-4 w-full" onClick={checkout}>
                 <Lock /> Finalizar compra

@@ -14,6 +14,7 @@ import { PasswordInput } from "@/components/auth/PasswordInput";
 import { useAuth } from "@/context/AuthContext";
 import { useCart } from "@/context/CartContext";
 import { formatPrice } from "@/lib/format";
+import { PRICES_READY } from "@/data/products";
 import { cn } from "@/lib/utils";
 
 const loginSchema = z.object({
@@ -76,7 +77,7 @@ export default function AuthPage() {
                 <strong>Casi listo.</strong> Inicia sesión o crea tu cuenta para finalizar tu compra
                 {count > 0 && (
                   <>
-                    {" "}de <strong className="price">{count} {count === 1 ? "producto" : "productos"} · {formatPrice(subtotal)}</strong>
+                    {" "}de <strong className="price">{count} {count === 1 ? "producto" : "productos"}{PRICES_READY ? ` · ${formatPrice(subtotal)}` : ""}</strong>
                   </>
                 )}
                 .

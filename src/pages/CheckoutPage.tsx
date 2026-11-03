@@ -1,9 +1,9 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, Navigate, useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { ChevronDown, Loader2, Lock, ShieldCheck, Truck, CreditCard, Landmark, Check, ArrowLeft } from "lucide-react";
+import { ChevronDown, Loader2, Lock, ShieldCheck, Truck, CreditCard, MessageCircle, Check, ArrowLeft } from "lucide-react";
 import { toast } from "sonner";
 import { SiteLayout } from "@/components/layout/SiteLayout";
 import { Button } from "@/components/ui/button";
@@ -13,7 +13,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Field } from "@/components/forms/Field";
 import { useCart } from "@/context/CartContext";
 import { useAuth } from "@/context/AuthContext";
-import { STORE, type ShippingOptionId } from "@/data/products";
+import { PRICES_READY, STORE } from "@/data/products";
 import { MX_STATES } from "@/data/content";
 import { formatPrice } from "@/lib/format";
 import { orderService } from "@/services/orders";
@@ -40,7 +40,6 @@ export default function CheckoutPage() {
   const { lines, subtotal, count, clear } = useCart();
   const { user, updateProfile } = useAuth();
   const navigate = useNavigate();
-  const [shippingId, setShippingId] = useState<ShippingOptionId>("standard");
   const [paymentId, setPaymentId] = useState(PAYMENT_METHODS.find((m) => m.enabled)?.id ?? "");
   const [summaryOpen, setSummaryOpen] = useState(false);
   const [placing, setPlacing] = useState(false);
@@ -70,12 +69,8 @@ export default function CheckoutPage() {
     document.title = "Finalizar compra · SINERGIA";
   }, []);
 
-  const shippingOption = STORE.shippingOptions.find((o) => o.id === shippingId)!;
-  const freeShipping = subtotal >= STORE.freeShippingThreshold && shippingId === "standard";
-  const shipping = freeShipping ? 0 : shippingOption.price;
-  const total = subtotal + shipping;
-
-  const totals = useMemo(() => ({ subtotal, shipping, total }), [subtotal, shipping, total]);
+  // Shipping is confirmed by WhatsApp, so the total is the products subtotal (when prices exist).
+  const total = PRICES_READY ? subtotal : null;
 
   if (!placing && lines.length === 0) return <Navigate to="/" replace />;
   if (!user) return null;
@@ -92,10 +87,9 @@ export default function CheckoutPage() {
         userId: user.id,
         email: user.email,
         items: lines.map((l) => ({ productId: l.productId, name: l.product.name, price: l.product.price, quantity: l.quantity, image: l.product.image })),
-        subtotal: totals.subtotal,
-        shipping: totals.shipping,
-        total: totals.total,
-        shippingOption: shippingId,
+        subtotal: total,
+        shipping: null,
+        total,
         address,
         paymentMethod: paymentId,
       });
@@ -140,26 +134,30 @@ export default function CheckoutPage() {
               <p className="truncate font-semibold">{product.name}</p>
               <p className="text-xs text-muted-foreground">{product.concentration} · {product.volume}</p>
             </div>
-            <span className="price font-semibold">{formatPrice(lineTotal)}</span>
+            {PRICES_READY && <span className="price font-semibold">{formatPrice(lineTotal)}</span>}
           </li>
         ))}
       </ul>
       <dl className="space-y-2 border-t pt-4 text-sm">
-        <div className="flex justify-between">
-          <dt className="text-muted-foreground">Subtotal</dt>
-          <dd className="price">{formatPrice(subtotal)}</dd>
+        {total !== null && (
+          <div className="flex justify-between">
+            <dt className="text-muted-foreground">Subtotal</dt>
+            <dd className="price">{formatPrice(total)}</dd>
+          </div>
+        )}
+        <div className="flex justify-between gap-4">
+          <dt className="text-muted-foreground">{total === null ? "Precio y envío" : "Envío"}</dt>
+          <dd className="text-right font-medium">Por confirmar en WhatsApp</dd>
         </div>
-        <div className="flex justify-between">
-          <dt className="text-muted-foreground">Envío ({shippingOption.label.toLowerCase()})</dt>
-          <dd className="price">{shipping === 0 ? <span className="font-semibold text-success">Gratis</span> : formatPrice(shipping)}</dd>
-        </div>
-        <div className="flex items-baseline justify-between border-t pt-3 text-base">
-          <dt className="font-semibold">Total</dt>
-          <dd className="price text-2xl font-bold">
-            <span className="mr-1 text-xs font-medium text-muted-foreground">{STORE.currency}</span>
-            {formatPrice(total)}
-          </dd>
-        </div>
+        {total !== null && (
+          <div className="flex items-baseline justify-between border-t pt-3 text-base">
+            <dt className="font-semibold">Total productos</dt>
+            <dd className="price text-2xl font-bold">
+              <span className="mr-1 text-xs font-medium text-muted-foreground">{STORE.currency}</span>
+              {formatPrice(total)}
+            </dd>
+          </div>
+        )}
       </dl>
     </div>
   );
@@ -178,7 +176,7 @@ export default function CheckoutPage() {
             {summaryOpen ? "Ocultar" : "Ver"} resumen ({count})
             <ChevronDown className={cn("h-4 w-4 transition-transform", summaryOpen && "rotate-180")} />
           </span>
-          <span className="price text-base text-foreground">{formatPrice(total)}</span>
+          <span className="price text-base text-foreground">{total === null ? `${count} ${count === 1 ? "producto" : "productos"}` : formatPrice(total)}</span>
         </button>
         {summaryOpen && <div className="container pb-5">{Summary}</div>}
       </div>
@@ -266,17 +264,13 @@ export default function CheckoutPage() {
           <section aria-labelledby="step-shipping">
             <div className="mb-5 flex items-center gap-4">
               <StepBadge n={3} />
-              <h2 id="step-shipping" className="font-sans text-xl font-bold">Método de envío</h2>
+              <h2 id="step-shipping" className="font-sans text-xl font-bold">Envío</h2>
             </div>
-            <div role="radiogroup" aria-labelledby="step-shipping" className="space-y-3">
-              {STORE.shippingOptions.map((o) => {
-                const free = o.id === "standard" && subtotal >= STORE.freeShippingThreshold;
-                return (
-                  <OptionCard key={o.id} selected={shippingId === o.id} onSelect={() => setShippingId(o.id)} icon={Truck} title={o.label} text={o.eta}>
-                    <span className="price font-semibold">{free ? <span className="text-success">Gratis</span> : formatPrice(o.price)}</span>
-                  </OptionCard>
-                );
-              })}
+            <div className="flex items-start gap-4 rounded-2xl border bg-card p-4 sm:p-5">
+              <Truck className="mt-0.5 h-5 w-5 shrink-0 text-primary" />
+              <p className="text-sm text-muted-foreground">
+                El costo y el tiempo de envío a tu dirección te los confirmamos por WhatsApp al recibir tu pedido.
+              </p>
             </div>
           </section>
 
@@ -293,7 +287,7 @@ export default function CheckoutPage() {
                   selected={paymentId === m.id}
                   disabled={!m.enabled}
                   onSelect={() => setPaymentId(m.id)}
-                  icon={m.id === "card" ? CreditCard : Landmark}
+                  icon={m.id === "card" ? CreditCard : MessageCircle}
                   title={m.label}
                   text={m.description}
                 >
@@ -313,7 +307,7 @@ export default function CheckoutPage() {
             </div>
             <Button type="submit" size="xl" className="w-full" disabled={placing || !paymentId}>
               {placing ? <Loader2 className="animate-spin" /> : <Lock />}
-              {placing ? "Procesando pedido…" : `Confirmar pedido · ${formatPrice(total)}`}
+              {placing ? "Procesando pedido…" : total === null ? "Confirmar pedido" : `Confirmar pedido · ${formatPrice(total)}`}
             </Button>
             <p className="flex items-center justify-center gap-2 text-center text-xs text-muted-foreground">
               <ShieldCheck className="h-4 w-4 text-primary" /> Tus datos solo se usan para procesar tu pedido.

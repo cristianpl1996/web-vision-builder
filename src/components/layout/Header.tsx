@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { Menu, ShoppingBag, User, ChevronRight, LogOut, Package } from "lucide-react";
-import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
+import { ShoppingBag, User, ChevronRight, LogOut, Package } from "lucide-react";
+import { Sheet, SheetContent, SheetDescription, SheetTitle } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { Logo } from "@/components/layout/Logo";
 import { useCart } from "@/context/CartContext";
@@ -65,13 +65,17 @@ export function Header() {
     >
       <div className="container flex h-[72px] items-center justify-between gap-4">
         <div className="flex items-center gap-1 lg:gap-0">
+          {/* Three equal bars sized to the word SINERGIA: first bar level with the top of the "S",
+              last bar on the baseline, left edge on the page gutter. */}
           <button
             type="button"
-            className={cn(iconBtn, "-ml-2.5 lg:hidden")}
+            className={cn(iconBtn, "-ml-[11px] -translate-y-2 sm:-translate-y-[9px] lg:hidden")}
             onClick={() => setMenuOpen(true)}
             aria-label="Abrir menú"
           >
-            <Menu className="h-6 w-6" />
+            <svg viewBox="0 0 22 16" className="h-4 w-[22px] sm:h-[18px] sm:w-[25px]" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" aria-hidden="true" preserveAspectRatio="none">
+              <path d="M1 1h20M1 8h20M1 15h20" />
+            </svg>
           </button>
           <Logo light={transparent} />
         </div>
@@ -95,7 +99,7 @@ export function Header() {
           </ul>
         </nav>
 
-        <div className="flex items-center gap-1 -mr-2.5">
+        <div className="flex items-center gap-1 -mr-2.5 -translate-y-2 sm:-translate-y-[9px] lg:translate-y-0">
           <Link
             to={user ? "/cuenta" : "/ingresar"}
             className={cn(iconBtn, "hidden sm:grid")}
@@ -130,6 +134,7 @@ export function Header() {
       <Sheet open={menuOpen} onOpenChange={setMenuOpen}>
         <SheetContent side="left" className="flex flex-col p-0">
           <SheetTitle className="sr-only">Menú</SheetTitle>
+          <SheetDescription className="sr-only">Navegación principal y acceso a tu cuenta</SheetDescription>
           <div className="flex h-[72px] items-center border-b px-5">
             <Logo />
           </div>

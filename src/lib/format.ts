@@ -16,6 +16,9 @@ const preciseFmt = new Intl.NumberFormat(STORE.locale, {
 });
 export const formatPricePrecise = (value: number) => preciseFmt.format(value);
 
+/** Price or the agreed wording when it hasn't been confirmed yet. */
+export const priceOrQuote = (value: number | null) => (value === null ? "Precio por WhatsApp" : formatPrice(value));
+
 export const formatDate = (iso: string) =>
   new Intl.DateTimeFormat(STORE.locale, { dateStyle: "long", timeStyle: "short" }).format(new Date(iso));
 

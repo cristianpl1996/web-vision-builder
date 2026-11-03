@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { useCart } from "@/context/CartContext";
 import { type Product } from "@/data/products";
 import { formatPrice, formatPricePrecise } from "@/lib/format";
+import { MessageCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export function ProductCard({ product, className }: { product: Product; className?: string }) {
@@ -66,10 +67,18 @@ export function ProductCard({ product, className }: { product: Product; classNam
             {product.compareAtPrice && (
               <span className="price block text-sm text-muted-foreground line-through">{formatPrice(product.compareAtPrice)}</span>
             )}
-            <span className="price text-2xl font-bold">{formatPrice(product.price)}</span>
-            <span className="price block text-xs text-muted-foreground">
-              {formatPricePrecise(product.price / product.totalMg)} por mg
-            </span>
+            {product.price === null ? (
+              <span className="inline-flex items-center gap-1.5 text-sm font-semibold text-primary">
+                <MessageCircle className="h-4 w-4" /> Precio por WhatsApp
+              </span>
+            ) : (
+              <>
+                <span className="price text-2xl font-bold">{formatPrice(product.price)}</span>
+                <span className="price block text-xs text-muted-foreground">
+                  {formatPricePrecise(product.price / product.totalMg)} por mg
+                </span>
+              </>
+            )}
           </div>
           <Button onClick={() => add(product.id)} aria-label={`Agregar ${product.name} al carrito`}>
             {inCart > 0 ? <Check /> : <ShoppingBag />}

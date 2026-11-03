@@ -3,8 +3,8 @@ import { useReveal } from "@/hooks/use-reveal";
 
 const steps = [
   { icon: ShoppingBag, title: "Elige tu presentación", text: "Agrega al carrito la presentación que mejor se adapte a tu mascota." },
-  { icon: UserCheck, title: "Crea tu cuenta y paga", text: "Solo al finalizar la compra. Guarda tus direcciones y consulta tus pedidos." },
-  { icon: PackageCheck, title: "Recíbelo en casa", text: "Elige envío estándar o express y consulta el estado en tu cuenta." },
+  { icon: UserCheck, title: "Crea tu cuenta", text: "Solo al finalizar la compra. Guarda tus direcciones y consulta tus pedidos." },
+  { icon: PackageCheck, title: "Envíanos tu pedido", text: "Por WhatsApp te confirmamos el precio, el pago y el envío." },
 ];
 
 /** "Cómo comprar" + safe-complement message */
