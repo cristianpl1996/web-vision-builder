@@ -23,7 +23,7 @@ El carrito funciona sin cuenta (se guarda en el navegador). La cuenta solo se pi
 
 ## Dónde editar
 
-- **Precios y WhatsApp:** `src/data/products.ts` (`STORE` y `PRODUCTS`). La landing anterior no publicaba precios, así que hoy están en `null` y la tienda muestra "Precio por WhatsApp". Al poner el precio de cada producto se muestran subtotales y totales en todo el flujo. El envío se confirma por WhatsApp.
+- **Precios y WhatsApp:** `src/data/products.ts` (`STORE` y `PRODUCTS`). ⚠️ Los precios actuales son de referencia, pendientes de confirmar con BOTICAN. Si un producto tiene `price: null`, la tienda muestra "Precio por WhatsApp". El envío se confirma por WhatsApp.
 - **Preguntas frecuentes y estados:** `src/data/content.ts`
 - **Colores y tipografía:** `src/index.css` y `tailwind.config.ts`
 

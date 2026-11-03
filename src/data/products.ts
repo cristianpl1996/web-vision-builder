@@ -12,9 +12,9 @@ import bottle1500 from "@/assets/bottle-1500.webp";
 /**
  * ─────────────────────────────────────────────────────────────
  *  STORE CONFIG
- *  The original landing published no prices or shipping terms, so none are
- *  shown. Set each product's `price` (MXN) once BOTICAN confirms them and the
- *  store shows prices, subtotals and totals automatically.
+ *  ⚠️ Product prices are REFERENCE values (MXN) pending BOTICAN's confirmation.
+ *  Set a price to `null` to show "Precio por WhatsApp" for that product instead.
+ *  Shipping is confirmed by WhatsApp (no shipping rates are published).
  * ─────────────────────────────────────────────────────────────
  */
 export const STORE = {
@@ -52,11 +52,11 @@ const BOTTLE_SCALE: Record<number, number> = { 250: 0.6, 500: 0.7, 750: 0.8, 100
 
 /** Product data taken from the bottle labels (250–750: 25 mg/ml · 1000–1500: 50 mg/ml). */
 export const PRODUCTS: Product[] = [
-  { id: "sinergia-250", slug: "sinergia-250", name: "SINERGIA 250 mg", totalMg: 250, concentration: "25 mg/ml", cbd: "25 mg/ml", cbg: "0.5 mg/ml", volume: "10 ml", price: null, image: img250, bottle: bottle250, bottleScale: BOTTLE_SCALE[250], tier: "standard" },
-  { id: "sinergia-500", slug: "sinergia-500", name: "SINERGIA 500 mg", totalMg: 500, concentration: "25 mg/ml", cbd: "25 mg/ml", cbg: "0.5 mg/ml", volume: "20 ml", price: null, image: img500, bottle: bottle500, bottleScale: BOTTLE_SCALE[500], tier: "standard" },
-  { id: "sinergia-750", slug: "sinergia-750", name: "SINERGIA 750 mg", totalMg: 750, concentration: "25 mg/ml", cbd: "25 mg/ml", cbg: "0.5 mg/ml", volume: "30 ml", price: null, image: img750, bottle: bottle750, bottleScale: BOTTLE_SCALE[750], tier: "standard", featured: true },
-  { id: "sinergia-1000", slug: "sinergia-1000", name: "SINERGIA 1000 mg", totalMg: 1000, concentration: "50 mg/ml", cbd: "50 mg/ml", cbg: "1 mg/ml", volume: "20 ml", price: null, image: img1000, bottle: bottle1000, bottleScale: BOTTLE_SCALE[1000], tier: "high" },
-  { id: "sinergia-1500", slug: "sinergia-1500", name: "SINERGIA 1500 mg", totalMg: 1500, concentration: "50 mg/ml", cbd: "50 mg/ml", cbg: "1 mg/ml", volume: "30 ml", price: null, image: img1500, bottle: bottle1500, bottleScale: BOTTLE_SCALE[1500], tier: "high" },
+  { id: "sinergia-250", slug: "sinergia-250", name: "SINERGIA 250 mg", totalMg: 250, concentration: "25 mg/ml", cbd: "25 mg/ml", cbg: "0.5 mg/ml", volume: "10 ml", price: 690, image: img250, bottle: bottle250, bottleScale: BOTTLE_SCALE[250], tier: "standard" },
+  { id: "sinergia-500", slug: "sinergia-500", name: "SINERGIA 500 mg", totalMg: 500, concentration: "25 mg/ml", cbd: "25 mg/ml", cbg: "0.5 mg/ml", volume: "20 ml", price: 1190, image: img500, bottle: bottle500, bottleScale: BOTTLE_SCALE[500], tier: "standard" },
+  { id: "sinergia-750", slug: "sinergia-750", name: "SINERGIA 750 mg", totalMg: 750, concentration: "25 mg/ml", cbd: "25 mg/ml", cbg: "0.5 mg/ml", volume: "30 ml", price: 1590, image: img750, bottle: bottle750, bottleScale: BOTTLE_SCALE[750], tier: "standard", featured: true },
+  { id: "sinergia-1000", slug: "sinergia-1000", name: "SINERGIA 1000 mg", totalMg: 1000, concentration: "50 mg/ml", cbd: "50 mg/ml", cbg: "1 mg/ml", volume: "20 ml", price: 2090, image: img1000, bottle: bottle1000, bottleScale: BOTTLE_SCALE[1000], tier: "high" },
+  { id: "sinergia-1500", slug: "sinergia-1500", name: "SINERGIA 1500 mg", totalMg: 1500, concentration: "50 mg/ml", cbd: "50 mg/ml", cbg: "1 mg/ml", volume: "30 ml", price: 2890, image: img1500, bottle: bottle1500, bottleScale: BOTTLE_SCALE[1500], tier: "high" },
 ];
 
 /** True only when every product has a confirmed price. */
