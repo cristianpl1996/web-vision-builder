@@ -1,51 +1,72 @@
-import { Card } from "@/components/ui/card";
-import { Brain, Pill, Zap } from "lucide-react";
+import { HeartPulse, Brain, Sparkles } from "lucide-react";
+import { useReveal } from "@/hooks/use-reveal";
+
+const benefits = [
+  {
+    icon: HeartPulse,
+    title: "Alivio del dolor",
+    text: "Reduce molestias de forma natural, mejorando la movilidad y el confort de tu mascota.",
+  },
+  {
+    icon: Brain,
+    title: "Calma y equilibrio",
+    text: "Ayuda a reducir la ansiedad y el estrés, promoviendo un estado emocional más estable.",
+  },
+  {
+    icon: Sparkles,
+    title: "Vitalidad",
+    text: "Mejora el apetito, la energía y la calidad de vida general de tu compañero.",
+  },
+];
 
 const SystemSection = () => {
+  const ref = useReveal<HTMLElement>();
   return (
-    <section id="sistema" className="py-24 bg-gradient-to-b from-secondary to-background">
-      <div className="container mx-auto px-4">
-        <div className="max-w-3xl mx-auto text-center mb-16">
-          <h2 className="text-4xl md:text-6xl font-bold mb-6 text-primary leading-tight">
-            Bienestar Natural para tu Mascota
-          </h2>
-          <p className="text-xl text-muted-foreground leading-relaxed">
-            Todos los mamíferos tienen un sistema natural que regula su bienestar. 
-            Los cannabinoides ayudan a <span className="text-primary font-semibold">equilibrar este sistema</span>, 
-            brindando alivio y calidad de vida.
-          </p>
-        </div>
-
-        <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
-          <Card className="p-8 text-center hover:shadow-2xl transition-all hover:-translate-y-2 duration-300 bg-card border-primary/10">
-            <div className="w-20 h-20 bg-gradient-to-br from-primary to-primary-light rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg">
-              <Brain className="w-10 h-10 text-primary-foreground" />
-            </div>
-            <h3 className="text-2xl font-bold mb-4 text-primary">Alivio del Dolor</h3>
-            <p className="text-muted-foreground leading-relaxed">
-              Reduce molestias de forma natural, mejorando la movilidad y el confort de tu mascota.
+    <section ref={ref} id="beneficios" className="section scroll-mt-20" aria-labelledby="beneficios-title">
+      <div className="container">
+        <div className="grid gap-10 lg:grid-cols-12 lg:gap-16">
+          <div className="reveal lg:col-span-5">
+            <span className="eyebrow">Sistema endocannabinoide</span>
+            <h2 id="beneficios-title" className="section-title mt-4">
+              Todos los mamíferos tienen un sistema natural que regula su bienestar.
+            </h2>
+            <p className="section-lead">
+              Los cannabinoides ayudan a{" "}
+              <strong className="font-semibold text-primary">equilibrar este sistema</strong>, brindando alivio y calidad de vida.
             </p>
-          </Card>
 
-          <Card className="p-8 text-center hover:shadow-2xl transition-all hover:-translate-y-2 duration-300 bg-card border-primary/10">
-            <div className="w-20 h-20 bg-gradient-to-br from-primary to-primary-light rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg">
-              <Pill className="w-10 h-10 text-primary-foreground" />
-            </div>
-            <h3 className="text-2xl font-bold mb-4 text-primary">Calma & Equilibrio</h3>
-            <p className="text-muted-foreground leading-relaxed">
-              Ayuda a reducir la ansiedad y el estrés, promoviendo un estado emocional más estable.
-            </p>
-          </Card>
+            <dl className="mt-10 grid grid-cols-3 divide-x rounded-3xl border bg-card p-2 shadow-soft">
+              {[
+                { k: "3", v: "componentes naturales" },
+                { k: "5", v: "presentaciones" },
+                { k: "2", v: "concentraciones" },
+              ].map((s) => (
+                <div key={s.v} className="min-w-0 px-1.5 py-4 text-center sm:px-3">
+                  <dt className="sr-only">{s.v}</dt>
+                  <dd className="font-display text-3xl font-medium text-primary sm:text-4xl">{s.k}</dd>
+                  <dd className="mt-1 text-[10px] leading-tight text-muted-foreground min-[360px]:text-[11px] min-[400px]:text-xs sm:text-sm">{s.v}</dd>
+                </div>
+              ))}
+            </dl>
+          </div>
 
-          <Card className="p-8 text-center hover:shadow-2xl transition-all hover:-translate-y-2 duration-300 bg-card border-primary/10">
-            <div className="w-20 h-20 bg-gradient-to-br from-primary to-primary-light rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg">
-              <Zap className="w-10 h-10 text-primary-foreground" />
-            </div>
-            <h3 className="text-2xl font-bold mb-4 text-primary">Vitalidad</h3>
-            <p className="text-muted-foreground leading-relaxed">
-              Mejora el apetito, la energía y la calidad de vida general de tu compañero.
-            </p>
-          </Card>
+          <ul className="grid gap-4 sm:gap-5 lg:col-span-7">
+            {benefits.map(({ icon: Icon, title, text }, i) => (
+              <li
+                key={title}
+                className="reveal surface flex gap-5 p-6 transition-shadow hover:shadow-medium sm:p-8"
+                style={{ transitionDelay: `${i * 70}ms` }}
+              >
+                <div className="grid h-14 w-14 shrink-0 place-items-center rounded-2xl bg-gradient-to-br from-primary to-primary-light text-primary-foreground shadow-glow">
+                  <Icon className="h-6 w-6" />
+                </div>
+                <div>
+                  <h3 className="font-display text-2xl font-medium">{title}</h3>
+                  <p className="mt-2 leading-relaxed text-muted-foreground">{text}</p>
+                </div>
+              </li>
+            ))}
+          </ul>
         </div>
       </div>
     </section>

@@ -1,34 +1,52 @@
-import { Card } from "@/components/ui/card";
-import { Sparkles } from "lucide-react";
+import { ShoppingBag, UserCheck, PackageCheck } from "lucide-react";
+import { useReveal } from "@/hooks/use-reveal";
 
+const steps = [
+  { icon: ShoppingBag, title: "Elige tu presentación", text: "Agrega al carrito la presentación que mejor se adapte a tu mascota." },
+  { icon: UserCheck, title: "Crea tu cuenta y paga", text: "Solo al finalizar la compra. Guarda tus direcciones y consulta tus pedidos." },
+  { icon: PackageCheck, title: "Recíbelo en casa", text: "Elige envío estándar o express y consulta el estado en tu cuenta." },
+];
+
+/** "Cómo comprar" + safe-complement message */
 const InteractionsSection = () => {
-
+  const ref = useReveal<HTMLElement>();
   return (
-    <section className="py-24 bg-gradient-to-b from-background to-secondary">
-      <div className="container mx-auto px-4">
-        <div className="max-w-3xl mx-auto text-center mb-16">
-          <h2 className="text-4xl md:text-6xl font-bold mb-6 text-primary leading-tight">
-            Complemento Perfecto
+    <section ref={ref} className="section bg-card" aria-labelledby="como-comprar-title">
+      <div className="container">
+        <div className="reveal mx-auto max-w-2xl text-center">
+          <span className="eyebrow">Cómo comprar</span>
+          <h2 id="como-comprar-title" className="section-title mt-4">
+            Tres pasos y listo
           </h2>
-          <p className="text-xl text-muted-foreground leading-relaxed">
-            SINERGIA trabaja de forma segura junto con otros tratamientos, 
-            <span className="text-primary font-semibold"> potenciando sus beneficios</span> sin efectos adversos.
-          </p>
         </div>
 
-        <Card className="p-12 max-w-4xl mx-auto bg-gradient-to-br from-primary/10 to-primary/5 border-primary/20 shadow-2xl">
-          <div className="text-center">
-            <div className="inline-flex items-center justify-center w-16 h-16 bg-primary rounded-2xl mb-6 shadow-lg">
-              <Sparkles className="w-8 h-8 text-primary-foreground" />
-            </div>
-            <p className="text-xl md:text-2xl text-foreground leading-relaxed font-medium">
-              <span className="text-primary font-bold">Seguro y efectivo</span> para uso a largo plazo.
-              <br className="hidden md:block" />
-              Tu mascota merece el mejor cuidado natural.
-            </p>
-            <br />
-          </div>
-        </Card>
+        <ol className="relative mt-12 grid gap-5 md:grid-cols-3 md:gap-6">
+          <div aria-hidden className="absolute left-[16%] right-[16%] top-9 hidden h-px border-t border-dashed border-primary/30 md:block" />
+          {steps.map(({ icon: Icon, title, text }, i) => (
+            <li key={title} className="reveal relative flex gap-5 md:flex-col md:items-center md:text-center" style={{ transitionDelay: `${i * 80}ms` }}>
+              <div className="relative grid h-[72px] w-[72px] shrink-0 place-items-center rounded-full border-4 border-card bg-secondary text-primary shadow-soft">
+                <Icon className="h-7 w-7" />
+                <span className="absolute -right-1 -top-1 grid h-7 w-7 place-items-center rounded-full bg-primary text-xs font-bold text-primary-foreground">
+                  {i + 1}
+                </span>
+              </div>
+              <div>
+                <h3 className="font-display text-xl font-medium sm:text-2xl">{title}</h3>
+                <p className="mt-2 text-muted-foreground">{text}</p>
+              </div>
+            </li>
+          ))}
+        </ol>
+
+        <div className="reveal mt-14 rounded-3xl border border-primary/15 bg-gradient-to-br from-secondary to-background p-8 text-center sm:p-12">
+          <p className="mx-auto max-w-3xl font-display text-2xl leading-snug sm:text-3xl">
+            SINERGIA trabaja de forma segura junto con otros tratamientos,{" "}
+            <em className="text-primary">potenciando sus beneficios.</em>
+          </p>
+          <p className="mt-4 text-muted-foreground">
+            <strong className="text-primary">Seguro y efectivo</strong> para uso a largo plazo. Tu mascota merece el mejor cuidado natural.
+          </p>
+        </div>
       </div>
     </section>
   );

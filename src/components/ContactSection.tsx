@@ -1,85 +1,64 @@
-import { Card } from "@/components/ui/card";
+import { MessageCircle, Instagram, ArrowUpRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Phone, Mail, MapPin } from "lucide-react";
+import { STORE } from "@/data/products";
+import { useReveal } from "@/hooks/use-reveal";
+import heroImage from "@/assets/hero-bg-sm.webp";
 
 const ContactSection = () => {
-  const handleContact = () => {
-    window.open("https://wa.me/525548993902", "_blank");
-  };
-
+  const ref = useReveal<HTMLElement>();
   return (
-    <section id="contacto" className="py-24 bg-gradient-to-b from-background to-secondary">
-      <div className="container mx-auto px-4">
-        <div className="max-w-3xl mx-auto text-center mb-12">
-          <h2 className="text-4xl md:text-6xl font-bold mb-6 text-primary leading-tight">
-            ¿Tienes dudas?
-          </h2>
-          <p className="text-xl text-muted-foreground leading-relaxed">
-            ¿Quieres conocer más acerca de este producto? Estamos aquí para asesorarte y resolver todas tus consultas
-          </p>
-        </div>
-
-        <Card className="max-w-3xl mx-auto p-12 text-center shadow-2xl bg-gradient-to-br from-card to-secondary/30">
-          <div className="space-y-6 mb-10">
-            <div className="flex items-center justify-center gap-6 text-foreground bg-primary/5 rounded-2xl p-6 hover:bg-primary/10 transition-colors">
-              <div className="w-16 h-16 bg-gradient-to-br from-primary to-primary-light rounded-2xl flex items-center justify-center shadow-lg flex-shrink-0">
-                <Phone className="w-8 h-8 text-primary-foreground" />
-              </div>
-              <div className="text-left">
-                <p className="text-sm font-medium text-muted-foreground mb-1">WhatsApp</p>
-                <p className="text-xl font-bold text-primary">(+52) 55 4899 39 02</p>
-              </div>
+    <section ref={ref} id="contacto" className="section scroll-mt-20" aria-labelledby="contacto-title">
+      <div className="container">
+        <div className="reveal relative isolate overflow-hidden rounded-[2rem] bg-primary text-primary-foreground">
+          <img src={heroImage} alt="" loading="lazy" className="absolute inset-0 -z-10 h-full w-full object-cover opacity-25 mix-blend-luminosity" />
+          <div className="absolute inset-0 -z-10 bg-gradient-to-r from-primary-dark via-primary-dark/90 to-primary/60" />
+          <div className="grid gap-8 p-6 sm:gap-10 sm:p-12 lg:grid-cols-2 lg:items-center lg:p-16 [&>*]:min-w-0">
+            <div>
+              <h2 id="contacto-title" className="font-display text-3xl font-medium leading-tight sm:text-5xl">
+                ¿Tienes dudas? <span className="italic text-white/80">Te asesoramos.</span>
+              </h2>
+              <p className="mt-4 max-w-md text-white/80 sm:text-lg">
+                Nuestro equipo te ayuda a elegir la presentación correcta y resuelve todas tus preguntas.
+              </p>
             </div>
-
-            <div className="flex items-center justify-center gap-6 text-foreground bg-primary/5 rounded-2xl p-6 hover:bg-primary/10 transition-colors">
-              <div className="w-16 h-16 bg-gradient-to-br from-primary to-primary-light rounded-2xl flex items-center justify-center shadow-lg flex-shrink-0">
-                <Mail className="w-8 h-8 text-primary-foreground" />
-              </div>
-              <div className="text-left">
-                <p className="text-sm font-medium text-muted-foreground mb-1">Síguenos</p>
-                <p className="text-xl font-bold text-primary">@marczuk.mario</p>
-              </div>
-            </div>
-
-            <div className="flex items-center justify-center gap-6 text-foreground bg-primary/5 rounded-2xl p-6 hover:bg-primary/10 transition-colors">
-              <div className="w-16 h-16 bg-gradient-to-br from-primary to-primary-light rounded-2xl flex items-center justify-center shadow-lg flex-shrink-0">
-                <MapPin className="w-8 h-8 text-primary-foreground" />
-              </div>
-              <div className="text-left">
-                <p className="text-sm font-medium text-muted-foreground mb-1">Desarrollado por</p>
-                <p className="text-xl font-bold text-primary">BOTICAN</p>
-              </div>
+            <div className="grid gap-3">
+              <a
+                href={`https://wa.me/${STORE.whatsapp}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="group flex min-w-0 items-center gap-3 rounded-2xl bg-white/10 p-4 backdrop-blur-sm transition-colors hover:bg-white/15 sm:gap-4 sm:p-5"
+              >
+                <span className="grid h-10 w-10 shrink-0 place-items-center rounded-full sm:h-12 sm:w-12 bg-[#25D366]">
+                  <MessageCircle className="h-5 w-5" />
+                </span>
+                <span className="min-w-0 flex-1">
+                  <span className="block text-sm text-white/70">WhatsApp</span>
+                  <span className="price block text-base font-semibold sm:text-lg">{STORE.whatsappDisplay}</span>
+                </span>
+                <ArrowUpRight className="h-5 w-5 shrink-0 opacity-60 transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
+              </a>
+              <a
+                href={`https://instagram.com/${STORE.instagram}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="group flex min-w-0 items-center gap-3 rounded-2xl bg-white/10 p-4 backdrop-blur-sm transition-colors hover:bg-white/15 sm:gap-4 sm:p-5"
+              >
+                <span className="grid h-10 w-10 shrink-0 place-items-center rounded-full sm:h-12 sm:w-12 bg-gradient-to-br from-fuchsia-500 to-amber-400">
+                  <Instagram className="h-5 w-5" />
+                </span>
+                <span className="min-w-0 flex-1">
+                  <span className="block text-sm text-white/70">Síguenos</span>
+                  <span className="block truncate text-base font-semibold sm:text-lg">@{STORE.instagram}</span>
+                </span>
+                <ArrowUpRight className="h-5 w-5 shrink-0 opacity-60 transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
+              </a>
+              <Button asChild size="xl" variant="light" className="mt-2">
+                <a href={`https://wa.me/${STORE.whatsapp}?text=${encodeURIComponent("Hola, quiero asesoría sobre SINERGIA")}`} target="_blank" rel="noopener noreferrer">
+                  Hablar con un asesor
+                </a>
+              </Button>
             </div>
           </div>
-
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button 
-              size="lg"
-              onClick={handleContact}
-              className="w-full sm:w-auto text-lg py-6 px-8 bg-primary hover:bg-primary/90 shadow-xl hover:shadow-2xl transition-all hover:scale-105"
-            >
-              <Phone className="mr-3 h-6 w-6" />
-              Realizar Pedido por WhatsApp
-            </Button>
-            <Button 
-              size="lg"
-              variant="outline"
-              onClick={() => window.open("https://instagram.com/marczuk.mario", "_blank")}
-              className="w-full sm:w-auto text-lg py-6 px-8 border-2 border-primary text-primary hover:bg-primary hover:text-primary-foreground shadow-xl transition-all hover:scale-105"
-            >
-              <Mail className="mr-3 h-6 w-6" />
-              Ver Instagram
-            </Button>
-          </div>
-        </Card>
-
-        <div className="mt-12 text-center">
-          <p className="text-muted-foreground text-sm">
-            © 2024 SINERGIA by BOTICAN. Todos los derechos reservados.
-          </p>
-          <p className="text-xs text-muted-foreground mt-2">
-            Uso Veterinario - Cannabinoides en la clínica diaria de perros y gatos
-          </p>
         </div>
       </div>
     </section>

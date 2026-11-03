@@ -1,73 +1,37 @@
-# Welcome to your Lovable project
+# SINERGIA by BOTICAN — Landing + Tienda
 
-## Project info
-
-**URL**: https://lovable.dev/projects/71ed4712-9ba6-4b74-b635-ba8765014e89
-
-## How can I edit this code?
-
-There are several ways of editing your application.
-
-**Use Lovable**
-
-Simply visit the [Lovable Project](https://lovable.dev/projects/71ed4712-9ba6-4b74-b635-ba8765014e89) and start prompting.
-
-Changes made via Lovable will be committed automatically to this repo.
-
-**Use your preferred IDE**
-
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
-
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-
-Follow these steps:
+Landing e-commerce (React + Vite + TypeScript + Tailwind + shadcn/ui) con carrito, cuentas de usuario y checkout.
 
 ```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
 npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
+npm run dev      # http://localhost:8080
+npm run build
 ```
 
-**Edit a file directly in GitHub**
+## Rutas
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+| Ruta | Descripción | Requiere cuenta |
+|---|---|---|
+| `/` | Landing + tienda | No |
+| `/producto/:slug` | Detalle de producto | No |
+| `/ingresar` | Iniciar sesión / registro (`?redirect=`) | No |
+| `/checkout` | Dirección, envío y pago | **Sí** |
+| `/cuenta` | Pedidos y direcciones | **Sí** |
+| `/pedido/:id` | Confirmación del pedido | **Sí** |
 
-**Use GitHub Codespaces**
+El carrito funciona sin cuenta (se guarda en el navegador). La cuenta solo se pide al finalizar la compra.
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+## Dónde editar
 
-## What technologies are used for this project?
+- **Precios, envíos, WhatsApp:** `src/data/products.ts` (`STORE` y `PRODUCTS`). ⚠️ Los precios actuales son provisionales.
+- **Preguntas frecuentes y estados:** `src/data/content.ts`
+- **Colores y tipografía:** `src/index.css` y `tailwind.config.ts`
 
-This project is built with:
+## Pendiente antes de producción
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+La capa de datos está detrás de interfaces para cambiar la implementación sin tocar la UI:
 
-## How can I deploy this project?
-
-Simply open [Lovable](https://lovable.dev/projects/71ed4712-9ba6-4b74-b635-ba8765014e89) and click on Share -> Publish.
-
-## Can I connect a custom domain to my Lovable project?
-
-Yes, you can!
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+1. **Autenticación:** `src/services/auth.ts`. Hoy usa `localAuthService` (cuentas guardadas en el navegador, **solo demo**). Implementa `AuthService` con Supabase Auth, Firebase u otra API y expórtalo como `authService`.
+2. **Pedidos:** `src/services/orders.ts`. Implementa `OrderService` contra tu backend. **El servidor debe recalcular los totales** a partir de los IDs de producto y no confiar en los precios que envía el navegador.
+3. **Pasarela de pago:** `src/services/payments.ts`. Crea un endpoint que genere el pago o la sesión (Mercado Pago, Stripe, Conekta, Openpay, Wompi...), haz que `start()` devuelva `{ type: "redirect", url }` y pon `enabled: true` en el método `card`. El checkout ya maneja la redirección.
+4. Correos de confirmación, términos y condiciones, y aviso de privacidad (los enlaces del registro apuntan a `#`).
