@@ -65,15 +65,15 @@ export function Header() {
     >
       <div className="container flex h-[72px] items-center justify-between gap-4">
         <div className="flex items-center gap-1 lg:gap-0">
-          {/* Three equal bars sized to the word SINERGIA: first bar level with the top of the "S",
+          {/* Three equal bars sized to the SINERGIA wordmark: first bar level with the top of the "S",
               last bar on the baseline, left edge on the page gutter. */}
           <button
             type="button"
-            className={cn(iconBtn, "-ml-[11px] -translate-y-2 sm:-translate-y-[9px] lg:hidden")}
+            className={cn(iconBtn, "-ml-[9px] -translate-y-2 lg:hidden")}
             onClick={() => setMenuOpen(true)}
             aria-label="Abrir menú"
           >
-            <svg viewBox="0 0 22 16" className="h-4 w-[22px] sm:h-[18px] sm:w-[25px]" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" aria-hidden="true" preserveAspectRatio="none">
+            <svg viewBox="0 0 22 16" className="h-5 w-[26px] sm:h-[22px] sm:w-[28px]" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" aria-hidden="true" preserveAspectRatio="none">
               <path d="M1 1h20M1 8h20M1 15h20" />
             </svg>
           </button>
@@ -99,7 +99,7 @@ export function Header() {
           </ul>
         </nav>
 
-        <div className="flex items-center gap-1 -mr-2.5 -translate-y-2 sm:-translate-y-[9px] lg:translate-y-0">
+        <div className="flex items-center gap-1 -mr-2.5 -translate-y-2 lg:translate-y-0">
           <Link
             to={user ? "/cuenta" : "/ingresar"}
             className={cn(iconBtn, "hidden sm:grid")}

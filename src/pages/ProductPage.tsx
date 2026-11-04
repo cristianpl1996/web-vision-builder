@@ -11,6 +11,7 @@ import { formatPrice, formatPricePrecise, priceOrQuote } from "@/lib/format";
 import { useCart } from "@/context/CartContext";
 import { useAuth } from "@/context/AuthContext";
 import { cn } from "@/lib/utils";
+import { BENEFITS } from "@/components/SystemSection";
 
 export default function ProductPage() {
   const { slug = "" } = useParams();
@@ -40,7 +41,7 @@ export default function ProductPage() {
     ["CBG", product.cbg],
     ["Volumen", product.volume],
     ["Tipo de extracto", "Broad Spectrum"],
-    ["Terpenos", "Lavanda, lúpulo, naranjo"],
+    ["Terpenos", "Linalol, mirceno, nerolidol"],
     ["Uso", "Veterinario · perros y gatos"],
   ];
 
@@ -159,10 +160,12 @@ export default function ProductPage() {
               <AccordionItem value="beneficios">
                 <AccordionTrigger className="text-base font-semibold hover:no-underline">Beneficios</AccordionTrigger>
                 <AccordionContent className="text-base leading-relaxed text-muted-foreground">
-                  <ul className="space-y-2">
-                    <li><strong className="text-foreground">Alivio del dolor:</strong> reduce molestias de forma natural, mejorando la movilidad y el confort de tu mascota.</li>
-                    <li><strong className="text-foreground">Calma y equilibrio:</strong> ayuda a reducir la ansiedad y el estrés, promoviendo un estado emocional más estable.</li>
-                    <li><strong className="text-foreground">Vitalidad:</strong> mejora el apetito, la energía y la calidad de vida general de tu compañero.</li>
+                  <ul className="space-y-3">
+                    {BENEFITS.map((b) => (
+                      <li key={b.title}>
+                        <strong className="text-foreground">{b.title}.</strong> {b.lead} {b.text}
+                      </li>
+                    ))}
                   </ul>
                 </AccordionContent>
               </AccordionItem>

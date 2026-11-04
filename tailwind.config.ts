@@ -98,6 +98,12 @@ export default {
           from: { transform: "translateX(0)" },
           to: { transform: "translateX(-50%)" },
         },
+        bubble: {
+          "0%": { transform: "translateY(0) scale(0.85)", opacity: "0" },
+          "15%": { opacity: "0.9" },
+          "85%": { opacity: "0.7" },
+          "100%": { transform: "translateY(-180px) scale(1.08)", opacity: "0" },
+        },
         "cart-bump": {
           "0%": { transform: "scale(1)" },
           "40%": { transform: "scale(1.25)" },
@@ -111,6 +117,7 @@ export default {
         float: "float 6s ease-in-out infinite",
         marquee: "marquee 40s linear infinite",
         "cart-bump": "cart-bump 0.4s cubic-bezier(0.22, 1, 0.36, 1)",
+        bubble: "bubble 14s ease-in-out infinite",
       },
     },
   },

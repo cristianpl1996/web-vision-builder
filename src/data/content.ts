@@ -6,19 +6,19 @@
 export const FAQS = [
   {
     q: "¿Qué contiene SINERGIA?",
-    a: "SINERGIA es una fórmula Broad Spectrum que combina CBD, CBG y terpenos naturales (lavanda, lúpulo y naranjo). Es de uso veterinario para perros y gatos.",
+    a: "SINERGIA es una fórmula Broad Spectrum que combina CBD, CBG y terpenos naturales (linalol, mirceno y nerolidol). Es de uso veterinario para perros y gatos.",
   },
   {
     q: "¿Qué hace cada componente?",
-    a: "El CBD es el protagonista: alivia el dolor, reduce la inflamación y calma la ansiedad. El CBG es el potenciador: trabaja en sinergia con el CBD para amplificar sus beneficios. Los terpenos potencian el efecto de los cannabinoides y aportan beneficios adicionales.",
+    a: "CBD, el protagonista: es conocido por su potencial para ayudar en el manejo del dolor, la inflamación y el bienestar general. CBG, el complemento: es un cannabinoide que se incorpora a nuestra fórmula por sus propiedades biológicas y su potencial para complementar la acción del CBD. Terpenos, la esencia: son compuestos naturales presentes en las plantas que aportan características únicas a nuestra fórmula y cuyo potencial para contribuir al bienestar se basa en evidencia científica.",
   },
   {
     q: "¿Qué presentaciones hay?",
-    a: "Cinco presentaciones: 250 mg (10 ml), 500 mg (20 ml) y 750 mg (30 ml) con 25 mg/ml de CBD; y 1000 mg (20 ml) y 1500 mg (30 ml) con 50 mg/ml de CBD.",
+    a: "SINERGIA tiene ocho presentaciones. Hoy encuentras en la tienda 1500 mg (30 ml) y 1000 mg (20 ml) con 50 mg/ml de CBD, y 750 mg (30 ml), 500 mg (20 ml) y 250 mg (10 ml) con 25 mg/ml de CBD. Las tres restantes llegan muy pronto.",
   },
   {
     q: "¿Puedo usarlo junto con otros tratamientos?",
-    a: "SINERGIA trabaja de forma segura junto con otros tratamientos, potenciando sus beneficios. Si tienes dudas sobre tu caso, escríbenos y te asesoramos.",
+    a: "SINERGIA trabaja de forma segura junto con otros tratamientos, potenciando sus beneficios. Además de nuestra asesoría, consulta siempre a tu médico veterinario antes de combinarlo con otros tratamientos.",
   },
   {
     q: "¿Necesito crear una cuenta para comprar?",

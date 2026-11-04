@@ -1,17 +1,17 @@
 import { Link } from "react-router-dom";
-import logoDark from "@/assets/logo-black-crop.png";
-import logoLight from "@/assets/logo-white-crop.png";
+import logoDark from "@/assets/logo-sinergia-dark.png";
+import logoLight from "@/assets/logo-sinergia-light.png";
 import { cn } from "@/lib/utils";
 
 export function Logo({ light = false, className }: { light?: boolean; className?: string }) {
   return (
-    <Link to="/" aria-label="SINERGIA by BOTICAN, ir al inicio" className={cn("inline-flex shrink-0 items-center", className)}>
+    <Link to="/" aria-label="SINERGIA, ir al inicio" className={cn("inline-flex shrink-0 items-center", className)}>
       <img
         src={light ? logoLight : logoDark}
-        alt="SINERGIA by BOTICAN"
-        width={434}
-        height={106}
-        className="h-8 w-auto sm:h-9"
+        alt="SINERGIA CBD+CBG & Terpenos"
+        width={1407}
+        height={377}
+        className="h-9 w-auto sm:h-10"
       />
     </Link>
   );

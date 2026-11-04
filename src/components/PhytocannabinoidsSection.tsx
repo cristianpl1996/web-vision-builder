@@ -7,20 +7,20 @@ const actives = [
     icon: Leaf,
     name: "CBD",
     role: "El protagonista",
-    text: "Alivia el dolor, reduce la inflamación y calma la ansiedad. Es el componente principal que mejora la calidad de vida de tu mascota de forma natural y segura.",
+    text: "El cannabidiol (CBD) es uno de los ingredientes principales de Sinergia. Es un compuesto natural que ha despertado gran interés científico por su potencial para ayudar a controlar el dolor, modular la inflamación y contribuir al bienestar y la calidad de vida.",
   },
   {
     icon: Droplet,
     name: "CBG",
-    role: "El potenciador",
-    text: "Trabaja en sinergia con el CBD para amplificar sus beneficios. Ayuda especialmente con la relajación muscular y el bienestar general.",
+    role: "El complemento",
+    text: "El cannabigerol (CBG) es un cannabinoide natural que complementa nuestra fórmula. Su potencial para modular la inflamación, especialmente en pacientes oncológicos, participar en el control del dolor y favorecer la funcionalidad está despertando un creciente interés científico.",
   },
 ];
 
 const terpenes = [
-  { name: "Lavanda", benefit: "Calma y relajación", text: "Reduce la ansiedad naturalmente" },
-  { name: "Lúpulo", benefit: "Alivio muscular", text: "Relaja y reduce la inflamación" },
-  { name: "Naranjo", benefit: "Protección celular", text: "Apoyo antioxidante natural" },
+  { name: "Linalol", benefit: "Reduce el estrés y la ansiedad" },
+  { name: "Mirceno", benefit: "Efecto antiinflamatorio y analgésico potente" },
+  { name: "Nerolidol", benefit: "Efecto antiinflamatorio y antioxidante" },
 ];
 
 const PhytocannabinoidsSection = () => {
@@ -34,7 +34,7 @@ const PhytocannabinoidsSection = () => {
             Ingredientes naturales, <em className="text-primary">resultados reales.</em>
           </h2>
           <p className="section-lead">
-            Nuestra fórmula combina componentes naturales de la planta que trabajan juntos para maximizar el bienestar de tu mascota.
+            Nuestra fórmula combina CBD, CBG y terpenos cuidadosamente seleccionados, integrando ciencia y naturaleza en una propuesta de bienestar para perros y gatos.
           </p>
         </div>
 
@@ -89,8 +89,7 @@ const PhytocannabinoidsSection = () => {
               {terpenes.map((t) => (
                 <li key={t.name} className="rounded-2xl border border-white/10 bg-white/5 p-5">
                   <p className="font-display text-2xl">{t.name}</p>
-                  <p className="mt-2 font-semibold text-white">{t.benefit}</p>
-                  <p className="mt-1 text-sm text-white/65">{t.text}</p>
+                  <p className="mt-2 text-sm leading-relaxed text-white/85">{t.benefit}</p>
                 </li>
               ))}
             </ul>

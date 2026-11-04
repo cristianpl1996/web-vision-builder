@@ -5,7 +5,13 @@ import { PRODUCTS, STORE } from "@/data/products";
 
 export function Footer() {
   return (
-    <footer className="bg-primary-dark text-primary-foreground">
+    <footer
+      className="relative isolate overflow-hidden text-primary-foreground"
+      style={{
+        backgroundImage:
+          "radial-gradient(50% 70% at 88% 0%, hsl(140 55% 65% / 0.28), transparent 70%), radial-gradient(45% 60% at 0% 100%, hsl(150 50% 40% / 0.35), transparent 70%), linear-gradient(115deg, hsl(154 48% 18%) 0%, hsl(152 44% 24%) 55%, hsl(149 40% 30%) 100%)",
+      }}
+    >
       <div className="border-b border-white/10">
         <div className="container grid gap-6 py-8 sm:grid-cols-3">
           {[

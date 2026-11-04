@@ -89,3 +89,32 @@ export function ProductCard({ product, className }: { product: Product; classNam
     </article>
   );
 }
+
+/** Placeholder for a presentation BOTICAN hasn't sent yet (data + professional photo pending). */
+export function UpcomingCard({ className }: { className?: string }) {
+  return (
+    <article
+      className={cn(
+        "relative flex flex-col overflow-hidden rounded-3xl border-2 border-dashed border-primary/25 bg-card/60",
+        className,
+      )}
+      aria-label="Nueva presentación, próximamente"
+    >
+      <div className="relative grid aspect-square place-items-center bg-gradient-to-b from-secondary/70 to-card">
+        <div className="flex flex-col items-center gap-3 text-primary/70">
+          <svg viewBox="0 0 40 96" className="h-28 w-auto opacity-60" aria-hidden="true">
+            <rect x="15" y="2" width="10" height="20" rx="4" fill="currentColor" opacity=".55" />
+            <rect x="11" y="20" width="18" height="12" rx="2" fill="currentColor" opacity=".7" />
+            <path d="M12 32h16v6c6 2 9 6 9 12v38a6 6 0 0 1-6 6H9a6 6 0 0 1-6-6V50c0-6 3-10 9-12z" fill="currentColor" opacity=".35" />
+          </svg>
+          <span className="rounded-full bg-primary/10 px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-primary">Próximamente</span>
+        </div>
+      </div>
+      <div className="flex flex-1 flex-col p-5 sm:p-6">
+        <h3 className="font-display text-xl font-medium text-foreground/70 sm:text-2xl">Nueva presentación</h3>
+        <p className="mt-1 text-sm text-muted-foreground">CBD + CBG + Terpenos · Broad Spectrum</p>
+        <p className="mt-auto pt-5 text-sm text-muted-foreground">Muy pronto en la tienda.</p>
+      </div>
+    </article>
+  );
+}

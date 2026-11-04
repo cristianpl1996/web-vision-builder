@@ -1,21 +1,24 @@
 import { HeartPulse, Brain, Sparkles } from "lucide-react";
 import { useReveal } from "@/hooks/use-reveal";
 
-const benefits = [
+export const BENEFITS = [
   {
     icon: HeartPulse,
-    title: "Alivio del dolor",
-    text: "Reduce molestias de forma natural, mejorando la movilidad y el confort de tu mascota.",
+    title: "Alivio y confort",
+    lead: "Porque el bienestar comienza cuando disminuye el sufrimiento.",
+    text: "Una propuesta orientada a acompañar el manejo del dolor y favorecer el confort físico de perros y gatos.",
   },
   {
     icon: Brain,
     title: "Calma y equilibrio",
-    text: "Ayuda a reducir la ansiedad y el estrés, promoviendo un estado emocional más estable.",
+    lead: "Porque el bienestar físico y emocional están conectados.",
+    text: "El potencial de los cannabinoides y terpenos para modular procesos relacionados con el estrés y favorecer el equilibrio fisiológico.",
   },
   {
     icon: Sparkles,
-    title: "Vitalidad",
-    text: "Mejora el apetito, la energía y la calidad de vida general de tu compañero.",
+    title: "Funcionalidad y calidad de vida",
+    lead: "Porque vivir mejor significa poder seguir haciendo lo que nos hace felices.",
+    text: "Preservar la movilidad, la autonomía y la capacidad de disfrutar las actividades cotidianas es parte fundamental del bienestar animal.",
   },
 ];
 
@@ -28,7 +31,7 @@ const SystemSection = () => {
           <div className="reveal lg:col-span-5">
             <span className="eyebrow">Sistema endocannabinoide</span>
             <h2 id="beneficios-title" className="section-title mt-4">
-              Todos los mamíferos tienen un sistema natural que regula su bienestar.
+              Todos los mamíferos tienen un sistema natural que regula su funcionalidad.
             </h2>
             <p className="section-lead">
               Los cannabinoides ayudan a{" "}
@@ -38,8 +41,8 @@ const SystemSection = () => {
             <dl className="mt-10 grid grid-cols-3 divide-x rounded-3xl border bg-card p-2 shadow-soft">
               {[
                 { k: "3", v: "componentes naturales" },
-                { k: "5", v: "presentaciones" },
-                { k: "2", v: "concentraciones" },
+                { k: "8", v: "presentaciones" },
+                { k: "3", v: "concentraciones" },
               ].map((s) => (
                 <div key={s.v} className="min-w-0 px-1.5 py-4 text-center sm:px-3">
                   <dt className="sr-only">{s.v}</dt>
@@ -51,7 +54,7 @@ const SystemSection = () => {
           </div>
 
           <ul className="grid gap-4 sm:gap-5 lg:col-span-7">
-            {benefits.map(({ icon: Icon, title, text }, i) => (
+            {BENEFITS.map(({ icon: Icon, title, lead, text }, i) => (
               <li
                 key={title}
                 className="reveal surface flex gap-5 p-6 transition-shadow hover:shadow-medium sm:p-8"
@@ -62,7 +65,8 @@ const SystemSection = () => {
                 </div>
                 <div>
                   <h3 className="font-display text-2xl font-medium">{title}</h3>
-                  <p className="mt-2 leading-relaxed text-muted-foreground">{text}</p>
+                  <p className="mt-2 font-semibold leading-snug text-foreground/85">{lead}</p>
+                  <p className="mt-1.5 leading-relaxed text-muted-foreground">{text}</p>
                 </div>
               </li>
             ))}

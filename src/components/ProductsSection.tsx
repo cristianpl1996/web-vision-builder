@@ -1,6 +1,6 @@
 import { useState } from "react";
-import { PRODUCTS } from "@/data/products";
-import { ProductCard } from "@/components/product/ProductCard";
+import { PRODUCTS, SHOP_PRODUCTS, TOTAL_PRESENTATIONS, isUpcoming } from "@/data/products";
+import { ProductCard, UpcomingCard } from "@/components/product/ProductCard";
 import { useReveal } from "@/hooks/use-reveal";
 import { cn } from "@/lib/utils";
 
@@ -15,7 +15,7 @@ type FilterId = (typeof FILTERS)[number]["id"];
 const ProductsSection = () => {
   const ref = useReveal<HTMLElement>();
   const [filter, setFilter] = useState<FilterId>("all");
-  const visible = PRODUCTS.filter((p) => filter === "all" || p.tier === filter);
+  const visible = filter === "all" ? SHOP_PRODUCTS : PRODUCTS.filter((p) => p.tier === filter);
 
   return (
     <section ref={ref} id="productos" className="section scroll-mt-20" aria-labelledby="productos-title">
@@ -26,7 +26,7 @@ const ProductsSection = () => {
             <h2 id="productos-title" className="section-title mt-4">
               Elige la mejor opción
             </h2>
-            <p className="section-lead">Cinco presentaciones diseñadas para adaptarse a las necesidades de tu mascota.</p>
+            <p className="section-lead">{TOTAL_PRESENTATIONS === 8 ? "Ocho" : TOTAL_PRESENTATIONS} presentaciones diseñadas para adaptarse a las necesidades de tu mascota.</p>
           </div>
 
           <div role="tablist" aria-label="Filtrar por concentración" className="inline-flex self-start rounded-full border bg-card p-1 md:self-auto">
@@ -49,9 +49,13 @@ const ProductsSection = () => {
         </div>
 
         <div className="mt-8 flex flex-wrap justify-center gap-5 lg:mt-10 lg:gap-6">
-          {visible.map((product, i) => (
-            <div key={product.id} className="reveal w-full sm:w-[calc(50%-10px)] lg:w-[calc(33.333%-16px)]" style={{ transitionDelay: `${(i % 3) * 60}ms` }}>
-              <ProductCard product={product} className="h-full" />
+          {visible.map((item, i) => (
+            <div
+              key={item.id}
+              className="reveal w-full sm:w-[calc(50%-10px)] lg:w-[calc(33.333%-16px)] xl:w-[calc(25%-18px)]"
+              style={{ transitionDelay: `${(i % 4) * 60}ms` }}
+            >
+              {isUpcoming(item) ? <UpcomingCard className="h-full" /> : <ProductCard product={item} className="h-full" />}
             </div>
           ))}
         </div>
