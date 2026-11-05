@@ -145,7 +145,7 @@ export function ProductsTab() {
       )}
 
       <Sheet open={!!editando} onOpenChange={(v) => !v && setEditando(null)}>
-        <SheetContent className="w-full overflow-y-auto sm:max-w-2xl">
+        <SheetContent onOpenAutoFocus={(e) => e.preventDefault()} className="w-full overflow-y-auto sm:max-w-2xl">
           {editando && (
             <ProductForm
               key={editando === "nuevo" ? "nuevo" : editando.id}

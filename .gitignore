@@ -33,3 +33,6 @@ __pycache__/
 .pytest_cache/
 .ruff_cache/
 .venv/
+
+# Capturas del recorrido de demostración (se regeneran)
+recorrido/

@@ -144,7 +144,7 @@ export function OrdersTab() {
 function OrderSheet({ order, onClose, onChanged }: { order: Order | null; onClose: () => void; onChanged: (o: Order) => void }) {
   return (
     <Sheet open={!!order} onOpenChange={(v) => !v && onClose()}>
-      <SheetContent className="w-full overflow-y-auto sm:max-w-xl">
+      <SheetContent onOpenAutoFocus={(e) => e.preventDefault()} className="w-full overflow-y-auto sm:max-w-xl">
         {/* key: al abrir otra orden, el formulario empieza de cero */}
         {order && <OrderDetail key={order.id} order={order} onChanged={onChanged} />}
       </SheetContent>

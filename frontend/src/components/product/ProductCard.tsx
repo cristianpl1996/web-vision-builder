@@ -55,12 +55,15 @@ export function ProductCard({ product, className }: { product: Product; classNam
               </Link>
             </h3>
             <p className="mt-1 text-sm text-muted-foreground">
-              CBD {product.cbd} · CBG {product.cbg} · {product.volume}
+              {[product.cbd && `CBD ${product.cbd}`, product.cbg && `CBG ${product.cbg}`, product.volume].filter(Boolean).join(" · ")}
             </p>
           </div>
         </div>
 
-        <p className="mt-3 text-sm leading-relaxed text-foreground/80">CBD + CBG + Terpenos · Broad Spectrum</p>
+        {/* La frase de la fórmula solo para productos con cannabinoides; otras líneas muestran su nombre. */}
+        <p className="mt-3 text-sm leading-relaxed text-foreground/80">
+          {product.cbd ? "CBD + CBG + Terpenos · Broad Spectrum" : product.line}
+        </p>
 
         <div className="mt-auto flex items-end justify-between gap-3 pt-5">
           <div>

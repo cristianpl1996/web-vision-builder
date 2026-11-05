@@ -94,7 +94,7 @@ export default function ProductPage() {
 
           {/* Info */}
           <div>
-            <p className="eyebrow">CBD + CBG + Terpenos · Broad Spectrum</p>
+            <p className="eyebrow">{product.cbd ? "CBD + CBG + Terpenos · Broad Spectrum" : product.line}</p>
             <h1 className="mt-3 font-display text-4xl font-medium leading-tight sm:text-5xl">{product.name}</h1>
             <p className="mt-4 text-lg leading-relaxed text-muted-foreground">{product.description}</p>
 
@@ -164,7 +164,7 @@ export default function ProductPage() {
 
             <ul className="mt-8 grid gap-3 rounded-3xl bg-secondary/70 p-5 text-sm sm:grid-cols-3">
               <li className="flex items-center gap-2"><MessageCircle className="h-4 w-4 text-primary" /> Asesoría por WhatsApp</li>
-              <li className="flex items-center gap-2"><Leaf className="h-4 w-4 text-primary" /> CBD + CBG + Terpenos</li>
+              <li className="flex items-center gap-2"><Leaf className="h-4 w-4 text-primary" /> {product.cbd ? "CBD + CBG + Terpenos" : product.line}</li>
               <li className="flex items-center gap-2"><PawPrint className="h-4 w-4 text-primary" /> Uso veterinario</li>
             </ul>
 
@@ -182,6 +182,7 @@ export default function ProductPage() {
                   </dl>
                 </AccordionContent>
               </AccordionItem>
+              {product.cbd && (
               <AccordionItem value="beneficios">
                 <AccordionTrigger className="text-base font-semibold hover:no-underline">Beneficios</AccordionTrigger>
                 <AccordionContent className="text-base leading-relaxed text-muted-foreground">
@@ -194,6 +195,7 @@ export default function ProductPage() {
                   </ul>
                 </AccordionContent>
               </AccordionItem>
+              )}
             </Accordion>
           </div>
         </div>
