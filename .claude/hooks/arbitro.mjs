@@ -23,9 +23,10 @@ if (/^frontend\/src\/.+\.tsx?$/.test(rel)) {
 } else if (/^backend\/.+\.py$/.test(rel) && !rel.startsWith("backend/.venv/")) {
   const archivo = rel.slice("backend/".length);
   // Versión fija de Ruff (como Hubu): entre versiones cambian las reglas.
+  // El formato se APLICA (no es una discusión); lo que frena son los hallazgos del lint.
   pasos = [
+    ["uvx", ["ruff@0.16.7", "format", "-q", archivo], "backend"],
     ["uvx", ["ruff@0.16.7", "check", archivo], "backend"],
-    ["uvx", ["ruff@0.16.7", "format", "--check", archivo], "backend"],
   ];
 } else {
   process.exit(0);

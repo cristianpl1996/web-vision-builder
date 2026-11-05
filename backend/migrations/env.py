@@ -3,11 +3,9 @@ import asyncio
 from alembic import context
 from sqlalchemy.ext.asyncio import create_async_engine
 
+from app import modelos  # noqa: F401 — registra las tablas en Base.metadata para autogenerate
 from app.config import settings
 from app.db import Base
-
-# Importar aquí los módulos de modelos para que autogenerate los vea, p. ej.:
-# from app import modelos  # noqa: F401
 
 target_metadata = Base.metadata
 

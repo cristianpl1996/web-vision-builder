@@ -8,4 +8,5 @@ select = ["E", "W", "F", "I", "B", "UP", "S", "ASYNC"]
 
 [lint.per-file-ignores]
 # assert es la forma de escribir un test con pytest.
-"tests/**" = ["S101"]
+# Contraseñas y secretos fijos en tests son datos de prueba, no credenciales.
+"tests/**" = ["S101", "S105", "S106", "S107"]

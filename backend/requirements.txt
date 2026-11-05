@@ -11,3 +11,4 @@ python-multipart==0.0.32     # subida de fotos de productos. <0.0.31 tiene 3 DoS
 httpx==0.28.1
 pytest==9.1.1
 pytest-asyncio==1.4.0
+cryptography==50.0.0         # Fernet: cifra las credenciales de Mercado Pago y SMTP guardadas en la base (como Hubu)

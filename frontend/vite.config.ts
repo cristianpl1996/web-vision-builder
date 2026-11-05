@@ -12,11 +12,13 @@ export default defineConfig(({ mode }) => ({
   server: {
     host: "::",
     port: 8080,
-    // En desarrollo la API corre en Docker (docker compose up -d db backend).
+    // En desarrollo la API corre en Docker. Dentro de compose (frontend-dev) el destino es
+    // http://backend:8000; desde la máquina, localhost:8000.
     proxy: {
-      "/v1": "http://localhost:8000",
-      "/health": "http://localhost:8000",
+      "/v1": process.env.VITE_PROXY_TARGET ?? "http://localhost:8000",
+      "/health": process.env.VITE_PROXY_TARGET ?? "http://localhost:8000",
     },
+    watch: process.env.VITE_USE_POLLING ? { usePolling: true, interval: 300 } : undefined,
   },
   plugins: [react(), mode === "development" && componentTagger()].filter(Boolean),
   resolve: {
