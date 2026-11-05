@@ -1,0 +1,3 @@
+# Los scripts que corren dentro de Linux (Docker) necesitan LF: con CRLF el shebang falla.
+*.sh text eol=lf
+Caddyfile text eol=lf

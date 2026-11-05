@@ -12,6 +12,11 @@ export default defineConfig(({ mode }) => ({
   server: {
     host: "::",
     port: 8080,
+    // En desarrollo la API corre en Docker (docker compose up -d db backend).
+    proxy: {
+      "/v1": "http://localhost:8000",
+      "/health": "http://localhost:8000",
+    },
   },
   plugins: [react(), mode === "development" && componentTagger()].filter(Boolean),
   resolve: {

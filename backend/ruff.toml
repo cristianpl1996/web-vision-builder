@@ -1,0 +1,11 @@
+line-length = 120
+target-version = "py312"
+
+[lint]
+# E/W/F: errores reales. I: imports ordenados. B: bugs comunes. UP: sintaxis moderna.
+# S: seguridad (bandit). ASYNC: llamadas bloqueantes en código async.
+select = ["E", "W", "F", "I", "B", "UP", "S", "ASYNC"]
+
+[lint.per-file-ignores]
+# assert es la forma de escribir un test con pytest.
+"tests/**" = ["S101"]

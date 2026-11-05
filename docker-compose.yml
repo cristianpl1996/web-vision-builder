@@ -1,0 +1,46 @@
+# SINERGIA: base de datos + API + web.
+#   docker compose up -d --build      → todo en http://localhost:8090
+#   docker compose up -d db backend   → solo la API, y el frontend con `npm run dev`
+name: sinergia
+
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: sinergia
+      POSTGRES_USER: sinergia
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-sinergia}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    ports:
+      - "5433:5432"   # 5433 en la máquina para no chocar con otro Postgres (Hubu); tests y alembic lo usan
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U sinergia -d sinergia"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  backend:
+    build: ./backend
+    env_file: .env
+    environment:
+      DATABASE_URL: postgresql+asyncpg://sinergia:${POSTGRES_PASSWORD:-sinergia}@db:5432/sinergia
+    volumes:
+      - media:/data/media   # fotos de productos
+    ports:
+      - "8000:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+
+  frontend:
+    build: ./frontend
+    ports:
+      - "8090:80"
+    depends_on:
+      backend:
+        condition: service_healthy
+
+volumes:
+  pgdata:
+  media:

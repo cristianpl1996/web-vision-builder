@@ -1,0 +1,23 @@
+{
+  "enabledPlugins": {
+    "superpowers@superpowers-dev": true,
+    "skill-creator@claude-plugins-official": true,
+    "ponytail@ponytail": true,
+    "ui-ux-pro-max@ui-ux-pro-max-skill": true
+  },
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/arbitro.mjs\"",
+            "timeout": 60,
+            "statusMessage": "Árbitro: lint del archivo tocado"
+          }
+        ]
+      }
+    ]
+  }
+}

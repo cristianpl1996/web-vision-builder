@@ -24,3 +24,12 @@ dist-ssr
 *.sw?
 
 dist-artifact
+
+# Secretos locales
+.env
+
+# Python
+__pycache__/
+.pytest_cache/
+.ruff_cache/
+.venv/

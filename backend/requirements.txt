@@ -1,0 +1,13 @@
+fastapi==0.141.1
+uvicorn[standard]==0.52.3
+sqlalchemy==2.0.52
+alembic==1.19.1
+asyncpg==0.31.0              # Postgres sin libpq: no hace falta psycopg ni libpq-dev en la imagen
+pydantic[email]==2.13.4
+pydantic-settings==2.15.0
+pyjwt==2.15.0                # JWT HS256 (misma versión que Hubu: <2.14 acepta firmas con caracteres fuera de Base64URL)
+bcrypt==4.0.1
+python-multipart==0.0.32     # subida de fotos de productos. <0.0.31 tiene 3 DoS HIGH
+httpx==0.28.1
+pytest==9.1.1
+pytest-asyncio==1.4.0

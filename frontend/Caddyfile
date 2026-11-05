@@ -1,0 +1,31 @@
+# El TLS lo termina el hosting (proxy delante); Caddy recibe HTTP en el 80.
+{
+	servers {
+		trusted_proxies static private_ranges
+	}
+}
+
+:80 {
+	encode gzip
+
+	# La API y su health van al backend de compose.
+	handle /v1/* {
+		reverse_proxy backend:8000
+	}
+	handle /health {
+		reverse_proxy backend:8000
+	}
+
+	# La SPA: cualquier ruta que no sea un archivo (/producto/..., /checkout) cae en index.html.
+	handle {
+		root * /srv
+		try_files {path} /index.html
+		file_server
+	}
+
+	header {
+		X-Content-Type-Options nosniff
+		Referrer-Policy strict-origin-when-cross-origin
+		X-Frame-Options SAMEORIGIN
+	}
+}
