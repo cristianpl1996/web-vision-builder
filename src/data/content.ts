@@ -6,7 +6,7 @@
 export const FAQS = [
   {
     q: "¿Qué contiene SINERGIA?",
-    a: "SINERGIA es una fórmula Broad Spectrum que combina CBD, CBG y terpenos naturales (linalol, mirceno y nerolidol). Es de uso veterinario para perros y gatos.",
+    a: "SINERGIA es una fórmula Broad Spectrum que combina CBD, CBG y terpenos naturales (linalol, mirceno y nerodiol). Es de uso veterinario para perros y gatos.",
   },
   {
     q: "¿Qué hace cada componente?",

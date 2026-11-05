@@ -20,7 +20,7 @@ const actives = [
 const terpenes = [
   { name: "Linalol", benefit: "Reduce el estrés y la ansiedad" },
   { name: "Mirceno", benefit: "Efecto antiinflamatorio y analgésico potente" },
-  { name: "Nerolidol", benefit: "Efecto antiinflamatorio y antioxidante" },
+  { name: "Nerodiol", benefit: "Efecto antiinflamatorio y antioxidante" },
 ];
 
 const PhytocannabinoidsSection = () => {

@@ -2,7 +2,6 @@ import { MessageCircle, Instagram, ArrowUpRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { STORE } from "@/data/products";
 import { useReveal } from "@/hooks/use-reveal";
-import { Bubbles } from "@/components/Bubbles";
 
 const ContactSection = () => {
   const ref = useReveal<HTMLElement>();
@@ -18,7 +17,6 @@ const ContactSection = () => {
                 "radial-gradient(55% 80% at 85% 30%, hsl(140 55% 70% / 0.35), transparent 70%), linear-gradient(115deg, hsl(154 50% 20%), hsl(150 42% 32%))",
             }}
           />
-          <Bubbles className="-z-10" count={12} />
           <div className="grid gap-8 p-6 sm:gap-10 sm:p-12 lg:grid-cols-2 lg:items-center lg:p-16 [&>*]:min-w-0">
             <div>
               <h2 id="contacto-title" className="font-display text-3xl font-medium leading-tight sm:text-5xl">

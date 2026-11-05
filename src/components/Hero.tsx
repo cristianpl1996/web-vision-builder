@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { ArrowRight, Leaf, Droplet, PawPrint, ShoppingBag } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Bubbles } from "@/components/Bubbles";
 import petsImage from "@/assets/pets-hero.webp";
 import petsImageSm from "@/assets/pets-hero-sm.webp";
 import { PRODUCTS } from "@/data/products";
@@ -17,12 +16,12 @@ const BASE = "linear-gradient(115deg, hsl(153 46% 26%) 0%, hsl(150 40% 34%) 55%,
 
 /** Wash ON TOP of the pets: green from the copy side, opening up so the pets stay visible. */
 const DESKTOP_WASH = [
-  "linear-gradient(90deg, hsl(154 48% 20% / 0.78) 0%, hsl(153 46% 23% / 0.6) 28%, hsl(152 44% 26% / 0.42) 46%, hsl(150 40% 32% / 0.12) 64%, transparent 82%)",
+  "linear-gradient(90deg, hsl(154 48% 20% / 0.85) 0%, hsl(153 46% 23% / 0.6) 26%, hsl(152 44% 26% / 0.18) 40%, transparent 52%)",
   "linear-gradient(180deg, hsl(154 48% 20% / 0.35) 0%, transparent 25%, transparent 78%, hsl(154 48% 20% / 0.45) 100%)",
 ].join(",");
 
 const MOBILE_WASH =
-  "linear-gradient(180deg, hsl(154 48% 20% / 0.5) 0%, hsl(153 46% 23% / 0.3) 20%, hsl(153 46% 24% / 0.42) 44%, hsl(153 46% 25% / 0.86) 58%, hsl(153 46% 25%) 66%)";
+  "linear-gradient(180deg, hsl(154 48% 20% / 0.4) 0%, transparent 14%, transparent 34%, hsl(153 46% 25% / 0.9) 46%, hsl(153 46% 25%) 54%)";
 
 /** The featured card cycles through the presentations (answers "¿esta imagen irá cambiando?"). */
 function useRotating(length: number, ms = 4200) {
@@ -46,13 +45,13 @@ const Hero = () => {
   return (
     <section className="relative isolate overflow-hidden text-white" style={{ backgroundImage: BASE }} aria-labelledby="hero-title">
       {/* Pets as the background: the doctor's own dog and cat */}
-      <picture className="absolute inset-x-[6%] top-[172px] -z-20 block h-[64vw] max-h-[400px] md:bottom-[3%] md:left-[4%] md:right-[46%] md:top-[9%] md:h-auto md:max-h-none xl:left-[9%] xl:right-[44%]">
+      <picture className="absolute inset-x-[8%] top-[92px] -z-20 block h-[56vw] max-h-[340px] md:bottom-0 md:left-[46%] md:right-[2%] md:top-[14%] md:h-auto md:max-h-none lg:left-[33%] lg:right-[22%] xl:left-[29%] xl:right-[33%]">
         <source media="(max-width: 767px)" srcSet={petsImageSm} />
         <img
           src={petsImage}
           alt=""
           {...{ fetchpriority: "high" }}
-          className="h-full w-full object-contain object-top md:object-center [filter:saturate(0.92)_brightness(0.96)]"
+          className="h-full w-full object-contain object-bottom [filter:saturate(0.95)]"
           style={{
             // Melt the cutout into the scene: soft fade at the bottom and sides, no hard edges
             WebkitMaskImage: "linear-gradient(to top, transparent 0%, #000 16%), linear-gradient(to right, transparent 0%, #000 12%, #000 88%, transparent 100%)",
@@ -66,9 +65,8 @@ const Hero = () => {
       </picture>
       <div aria-hidden className="absolute inset-0 -z-10 md:hidden" style={{ backgroundImage: MOBILE_WASH }} />
       <div aria-hidden className="absolute inset-0 -z-10 hidden md:block" style={{ backgroundImage: DESKTOP_WASH }} />
-      <Bubbles className="-z-10" />
 
-      <div className="container grid items-end gap-10 pb-10 pt-[112px] md:min-h-[560px] md:items-center md:pb-14 md:pt-28 lg:min-h-[min(max(620px,36vw),720px)] lg:grid-cols-12">
+      <div className="container grid items-end gap-10 pb-10 pt-[calc(84px+min(56vw,340px))] md:min-h-[560px] md:items-center md:pb-14 md:pt-28 lg:min-h-[min(max(620px,36vw),720px)] lg:grid-cols-12">
         {/* Copy */}
         <div className="lg:col-span-6">
           <span className="inline-flex animate-fade-up items-center gap-2 rounded-full border border-white/30 bg-white/10 px-3 py-1.5 text-xs font-semibold tracking-wide backdrop-blur-md">

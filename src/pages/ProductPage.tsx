@@ -41,7 +41,7 @@ export default function ProductPage() {
     ["CBG", product.cbg],
     ["Volumen", product.volume],
     ["Tipo de extracto", "Broad Spectrum"],
-    ["Terpenos", "Linalol, mirceno, nerolidol"],
+    ["Terpenos", "Linalol, mirceno, nerodiol"],
     ["Uso", "Veterinario · perros y gatos"],
   ];
 
