@@ -3,13 +3,11 @@ import { ArrowRight, Leaf, Droplet, PawPrint, ShoppingBag } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import petsImage from "@/assets/pets-hero.webp";
 import petsImageSm from "@/assets/pets-hero-sm.webp";
-import { PRODUCTS } from "@/data/products";
+import { useCatalog } from "@/context/CatalogContext";
 import { formatPrice, priceOrQuote } from "@/lib/format";
 import { useCart } from "@/context/CartContext";
 import { cn } from "@/lib/utils";
 
-const prices = PRODUCTS.map((p) => p.price).filter((v): v is number => v !== null);
-const fromPrice = prices.length ? Math.min(...prices) : null;
 
 /** Base: a fresh, lighter green (not the near-black of before). */
 const BASE = "linear-gradient(115deg, hsl(153 46% 26%) 0%, hsl(150 40% 34%) 55%, hsl(146 36% 42%) 100%)";
@@ -39,8 +37,13 @@ function useRotating(length: number, ms = 4200) {
 const Hero = () => {
   const { add } = useCart();
   const scrollTo = (id: string) => document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
+  // El carrusel muestra lo que se puede comprar, empezando por el destacado.
+  const { products } = useCatalog();
+  const PRODUCTS = [...products.filter((p) => !p.soldOut)].sort((a, b) => Number(b.featured) - Number(a.featured));
+  const prices = PRODUCTS.map((p) => p.price).filter((v): v is number => v !== null);
+  const fromPrice = prices.length ? Math.min(...prices) : null;
   const { i, setI, setPaused } = useRotating(PRODUCTS.length);
-  const featured = PRODUCTS[i];
+  const featured = PRODUCTS[i % Math.max(PRODUCTS.length, 1)];
 
   return (
     <section className="relative isolate overflow-hidden text-white" style={{ backgroundImage: BASE }} aria-labelledby="hero-title">
@@ -116,6 +119,7 @@ const Hero = () => {
 
         {/* Featured product: same large card as before, right-aligned, cycling through the presentations */}
         <div className="hidden lg:col-span-6 lg:flex lg:justify-end">
+          {featured && (
           <article
             className="relative w-[340px] animate-fade-up [animation-delay:300ms]"
             onMouseEnter={() => setPaused(true)}
@@ -180,6 +184,7 @@ const Hero = () => {
               </div>
             </div>
           </article>
+          )}
         </div>
       </div>
     </section>

@@ -1,12 +1,13 @@
 import { useEffect, useState } from "react";
 import { Link, Navigate, useNavigate, useParams } from "react-router-dom";
-import { ChevronRight, ShoppingBag, Zap, MessageCircle, PawPrint, Leaf, Check } from "lucide-react";
+import { ChevronRight, ShoppingBag, Zap, MessageCircle, PawPrint, Leaf, Check, Loader2 } from "lucide-react";
 import { SiteLayout } from "@/components/layout/SiteLayout";
 import { Button } from "@/components/ui/button";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { QuantityStepper } from "@/components/cart/QuantityStepper";
 import { ProductCard } from "@/components/product/ProductCard";
-import { describeProduct, getProductBySlug, PRODUCTS, STORE, TIER_LABEL } from "@/data/products";
+import { STORE } from "@/data/products";
+import { useCatalog } from "@/context/CatalogContext";
 import { formatPrice, formatPricePrecise, priceOrQuote } from "@/lib/format";
 import { useCart } from "@/context/CartContext";
 import { useAuth } from "@/context/AuthContext";
@@ -15,7 +16,8 @@ import { BENEFITS } from "@/components/SystemSection";
 
 export default function ProductPage() {
   const { slug = "" } = useParams();
-  const product = getProductBySlug(slug);
+  const { getBySlug, products, loading } = useCatalog();
+  const product = getBySlug(slug);
   const navigate = useNavigate();
   const { add } = useCart();
   const { user } = useAuth();
@@ -26,7 +28,21 @@ export default function ProductPage() {
     if (product) document.title = `${product.name} · SINERGIA by BOTICAN`;
   }, [product]);
 
+  if (loading) {
+    return (
+      <SiteLayout>
+        <div className="grid min-h-[60vh] place-items-center" aria-busy="true">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        </div>
+      </SiteLayout>
+    );
+  }
   if (!product) return <Navigate to="/404" replace />;
+
+  // Las demás presentaciones de la misma línea (para el selector y «Otras presentaciones»).
+  const PRODUCTS = products.filter((p) => p.line === product.line);
+  const comprable = !product.soldOut && product.price !== null;
+  const waTexto = encodeURIComponent(`Hola, me interesa ${product.name}`);
 
   const buyNow = () => {
     add(product.id, qty, { openDrawer: false });
@@ -34,16 +50,7 @@ export default function ProductPage() {
   };
 
   const related = PRODUCTS.filter((p) => p.id !== product.id).slice(0, 3);
-  const specs = [
-    ["Contenido total", `${product.totalMg} mg`],
-    ["Concentración", product.concentration],
-    ["CBD", product.cbd],
-    ["CBG", product.cbg],
-    ["Volumen", product.volume],
-    ["Tipo de extracto", "Broad Spectrum"],
-    ["Terpenos", "Linalol, mirceno, nerodiol"],
-    ["Uso", "Veterinario · perros y gatos"],
-  ];
+  const specs = product.specs;
 
   return (
     <SiteLayout fabRaised>
@@ -89,7 +96,7 @@ export default function ProductPage() {
           <div>
             <p className="eyebrow">CBD + CBG + Terpenos · Broad Spectrum</p>
             <h1 className="mt-3 font-display text-4xl font-medium leading-tight sm:text-5xl">{product.name}</h1>
-            <p className="mt-4 text-lg leading-relaxed text-muted-foreground">{describeProduct(product)}</p>
+            <p className="mt-4 text-lg leading-relaxed text-muted-foreground">{product.description}</p>
 
             {product.price === null ? (
               <p className="mt-6 inline-flex items-center gap-2 rounded-full bg-secondary px-4 py-2 font-semibold text-primary">
@@ -99,7 +106,8 @@ export default function ProductPage() {
               <div className="mt-6 flex items-end gap-3">
                 <span className="price text-4xl font-bold">{formatPrice(product.price)}</span>
                 <span className="price pb-1.5 text-sm text-muted-foreground">
-                  {STORE.currency} · {formatPricePrecise(product.price / product.totalMg)} por mg
+                  {STORE.currency}
+                  {product.totalMg > 0 && ` · ${formatPricePrecise(product.price / product.totalMg)} por mg`}
                 </span>
               </div>
             )}
@@ -122,20 +130,37 @@ export default function ProductPage() {
                   </Link>
                 ))}
               </div>
-              <p className="mt-3 flex items-center gap-2 text-sm text-primary">
-                <Check className="h-4 w-4" /> {TIER_LABEL[product.tier]}
-              </p>
+              {product.concentration && (
+                <p className="mt-3 flex items-center gap-2 text-sm text-primary">
+                  <Check className="h-4 w-4" /> Concentración {product.concentration}
+                </p>
+              )}
             </div>
 
-            <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-              <QuantityStepper value={qty} onChange={setQty} className="self-start" />
-              <Button size="xl" className="w-full sm:w-auto sm:flex-1" onClick={() => add(product.id, qty)}>
-                <ShoppingBag /> Agregar al carrito
-              </Button>
-            </div>
-            <Button size="xl" variant="outline" className="mt-3 w-full" onClick={buyNow}>
-              <Zap /> Comprar ahora
-            </Button>
+            {comprable ? (
+              <>
+                <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+                  <QuantityStepper value={qty} onChange={setQty} className="self-start" />
+                  <Button size="xl" className="w-full sm:w-auto sm:flex-1" onClick={() => add(product.id, qty)}>
+                    <ShoppingBag /> Agregar al carrito
+                  </Button>
+                </div>
+                <Button size="xl" variant="outline" className="mt-3 w-full" onClick={buyNow}>
+                  <Zap /> Comprar ahora
+                </Button>
+              </>
+            ) : (
+              <div className="mt-8 space-y-3">
+                {product.soldOut && (
+                  <p className="rounded-2xl bg-secondary p-4 text-sm font-medium">Esta presentación está agotada por ahora.</p>
+                )}
+                <Button asChild size="xl" variant="outline" className="w-full">
+                  <a href={`https://wa.me/${STORE.whatsapp}?text=${waTexto}`} target="_blank" rel="noopener noreferrer">
+                    <MessageCircle /> Pregúntanos por WhatsApp
+                  </a>
+                </Button>
+              </div>
+            )}
 
             <ul className="mt-8 grid gap-3 rounded-3xl bg-secondary/70 p-5 text-sm sm:grid-cols-3">
               <li className="flex items-center gap-2"><MessageCircle className="h-4 w-4 text-primary" /> Asesoría por WhatsApp</li>
@@ -190,9 +215,17 @@ export default function ProductPage() {
             <p className="truncate text-sm font-semibold">{product.name}</p>
             <p className={product.price === null ? "text-sm font-semibold text-primary" : "price text-lg font-bold"}>{product.price === null ? priceOrQuote(null) : formatPrice(product.price * qty)}</p>
           </div>
-          <Button size="lg" onClick={() => add(product.id, qty)}>
-            <ShoppingBag /> Agregar
-          </Button>
+          {comprable ? (
+            <Button size="lg" onClick={() => add(product.id, qty)}>
+              <ShoppingBag /> Agregar
+            </Button>
+          ) : (
+            <Button asChild size="lg" variant="outline">
+              <a href={`https://wa.me/${STORE.whatsapp}?text=${waTexto}`} target="_blank" rel="noopener noreferrer">
+                <MessageCircle /> WhatsApp
+              </a>
+            </Button>
+          )}
         </div>
       </div>
     </SiteLayout>

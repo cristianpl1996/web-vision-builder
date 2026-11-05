@@ -6,6 +6,7 @@ import { BrowserRouter, MemoryRouter, Routes, Route } from "react-router-dom";
 import { Loader2 } from "lucide-react";
 import { CartProvider } from "@/context/CartContext";
 import { AuthProvider } from "@/context/AuthContext";
+import { CatalogProvider } from "@/context/CatalogContext";
 import { RequireAuth } from "@/components/auth/RequireAuth";
 import Index from "./pages/Index";
 
@@ -16,8 +17,12 @@ const CheckoutPage = lazy(() => import("./pages/CheckoutPage"));
 const AccountPage = lazy(() => import("./pages/AccountPage"));
 const OrderConfirmationPage = lazy(() => import("./pages/OrderConfirmationPage"));
 const NotFound = lazy(() => import("./pages/NotFound"));
+const AdminPage = lazy(() => import("./pages/admin/AdminPage"));
+const VerifyEmailPage = lazy(() => import("./pages/EmailLinkPages").then((m) => ({ default: m.VerifyEmailPage })));
+const ForgotPasswordPage = lazy(() => import("./pages/EmailLinkPages").then((m) => ({ default: m.ForgotPasswordPage })));
+const ResetPasswordPage = lazy(() => import("./pages/EmailLinkPages").then((m) => ({ default: m.ResetPasswordPage })));
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({ defaultOptions: { queries: { refetchOnWindowFocus: false, retry: 1 } } });
 
 // The shareable preview build runs inside a frame where URL paths can't change, so it routes in memory.
 const Router = import.meta.env.VITE_ROUTER === "memory" ? MemoryRouter : BrowserRouter;
@@ -31,6 +36,7 @@ const PageLoader = () => (
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <AuthProvider>
+      <CatalogProvider>
       <CartProvider>
         <TooltipProvider>
           <Sonner theme="light" position="top-center" richColors closeButton duration={3500} />
@@ -64,12 +70,24 @@ const App = () => (
                     </RequireAuth>
                   }
                 />
+                <Route path="/verificar" element={<VerifyEmailPage />} />
+                <Route path="/recuperar" element={<ForgotPasswordPage />} />
+                <Route path="/restablecer" element={<ResetPasswordPage />} />
+                <Route
+                  path="/admin"
+                  element={
+                    <RequireAuth admin>
+                      <AdminPage />
+                    </RequireAuth>
+                  }
+                />
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </Suspense>
           </Router>
         </TooltipProvider>
       </CartProvider>
+      </CatalogProvider>
     </AuthProvider>
   </QueryClientProvider>
 );

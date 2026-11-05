@@ -35,14 +35,14 @@ export function ProductCard({ product, className }: { product: Product; classNam
           />
         </div>
         <div className="absolute left-4 top-4 flex flex-wrap gap-2">
-          <span
-            className={cn(
-              "rounded-full px-3 py-1 text-[11px] font-semibold",
-              product.tier === "high" ? "bg-primary text-primary-foreground" : "bg-secondary text-secondary-foreground",
-            )}
-          >
-            {product.concentration}
-          </span>
+          {product.concentration && (
+            <span className="rounded-full bg-secondary px-3 py-1 text-[11px] font-semibold text-secondary-foreground">
+              {product.concentration}
+            </span>
+          )}
+          {product.soldOut && (
+            <span className="rounded-full bg-foreground px-3 py-1 text-[11px] font-semibold text-background">Agotado</span>
+          )}
         </div>
       </Link>
 
@@ -75,15 +75,21 @@ export function ProductCard({ product, className }: { product: Product; classNam
               <>
                 <span className="price text-2xl font-bold">{formatPrice(product.price)}</span>
                 <span className="price block text-xs text-muted-foreground">
-                  {formatPricePrecise(product.price / product.totalMg)} por mg
+                  {product.totalMg > 0 && `${formatPricePrecise(product.price / product.totalMg)} por mg`}
                 </span>
               </>
             )}
           </div>
-          <Button onClick={() => add(product.id)} aria-label={`Agregar ${product.name} al carrito`}>
-            {inCart > 0 ? <Check /> : <ShoppingBag />}
-            {inCart > 0 ? `En carrito (${inCart})` : "Agregar"}
-          </Button>
+          {product.soldOut ? (
+            <Button variant="outline" disabled>
+              Agotado
+            </Button>
+          ) : (
+            <Button onClick={() => add(product.id)} aria-label={`Agregar ${product.name} al carrito`}>
+              {inCart > 0 ? <Check /> : <ShoppingBag />}
+              {inCart > 0 ? `En carrito (${inCart})` : "Agregar"}
+            </Button>
+          )}
         </div>
       </div>
     </article>

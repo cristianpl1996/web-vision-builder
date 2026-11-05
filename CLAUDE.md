@@ -11,9 +11,33 @@ en español de México y en lenguaje de cliente, nunca en términos técnicos.
 Todo corre con `docker compose`. API bajo `/v1`, salud en `/health`, documentación
 en `/v1/docs`. Auth = JWT (cliente y superadmin son la misma tabla con un rol).
 
-El frontend nació sin backend: `frontend/src/services/{auth,orders,payments}.ts` son
-INTERFACES con una implementación local (localStorage). El backend se conecta
-reemplazando esa implementación por una que llama a la API, sin tocar pantallas.
+Las pantallas nunca llaman a `fetch`: usan `frontend/src/services/*` (auth, orders,
+store, admin) sobre `lib/api.ts`. El catálogo llega de `/v1/productos` por
+`context/CatalogContext.tsx`; no hay productos escritos en el código.
+
+## Backend por capas
+- `app/routers/` — HTTP: auth, validar la entrada, forma de la respuesta.
+  `auth` (cuentas), `productos` (tienda + admin + fotos), `ordenes` (cliente + admin),
+  `pagos` (webhook de Mercado Pago), `ajustes` (Admin › Ajustes).
+- `app/services/` — las reglas, una pregunta = un dueño:
+  `ordenes` (precio, envío, estados y transiciones), `mercadopago` (preferencia, firma,
+  `aplicar_pago` idempotente), `ajustes` (configuración y secretos cifrados con Fernet),
+  `correo` (SMTP) y `avisos` (qué correo sale en cada momento).
+- `app/seguridad.py` — contraseñas (bcrypt), JWT y las dependencias `Actual` / `Admin`.
+  Toda ruta de admin recibe `_: Admin`; ninguna decide permisos a mano.
+- `app/modelos.py` (tablas), `app/schemas.py` (entrada/salida), `migrations/` (Alembic),
+  `app/semilla/` (catálogo inicial, solo si la tabla está vacía).
+
+## Mercado Pago
+Checkout Pro. Las credenciales se cargan en **Admin › Ajustes** (cifradas): Access Token,
+Public Key y la clave secreta del webhook. El pago se confirma por el webhook
+`/v1/pagos/webhook/mercadopago` (firma `x-signature` verificada) y, al volver a la tienda,
+consultando la API de MP (`/ordenes/{id}/verificar-pago`). En los dos casos el pago se LEE
+de la API de MP y se exige monto y moneda exactos. En producción hay que poner
+`WEBHOOK_URL_PUBLICA` (https) y registrar esa URL en el panel de Mercado Pago.
+
+## Superadmin
+No se crea desde la web: `docker compose exec backend python -m app.crear_superadmin <correo> <contraseña>`.
 
 ## Guía por zona
 - `docs/superpowers/specs/` — los diseños aprobados (qué y por qué) antes de código.
@@ -64,18 +88,20 @@ primero— así que manda esto:
 ## Correr el proyecto y los tests
 ```
 cp .env.example .env
-docker compose up -d --build            # todo en http://localhost:8090
-# o, para desarrollar el frontend con recarga:
-docker compose up -d db backend && cd frontend && npm install && npm run dev
+docker compose up -d --build                 # todo en http://localhost:8090
+docker compose --profile dev up -d --build   # + Vite con recarga (5174) y Mailpit (8025)
 ```
 - Backend: `cd backend && uv venv --python 3.12 .venv && uv pip install -p .venv -r requirements.txt`,
   luego `.venv/Scripts/python -m pytest` (Windows) con la base de compose arriba
-  (Postgres en `localhost:5433`). Lint: `uvx ruff@0.16.7 check . && uvx ruff@0.16.7 format --check .`
+  (Postgres en `localhost:5433`). Los tests usan su propia base, `sinergia_test`, que
+  crean y vacían solos; Mercado Pago y el correo se simulan.
+  Lint: `uvx ruff@0.16.7 check . && uvx ruff@0.16.7 format --check .`
 - Frontend: `cd frontend && npx tsc -p tsconfig.app.json --noEmit && npm run build`.
 - Migraciones: `cd backend && .venv/Scripts/alembic revision --autogenerate -m "..."`;
   el contenedor aplica `alembic upgrade head` al arrancar.
 
 ## Puertos en desarrollo
 Postgres `5433` (para no chocar con otro Postgres local), API `8000`, web en Docker
-`8090`, `npm run dev` en `8080` (o el siguiente libre). El dev server de Vite manda
-`/v1` y `/health` a `localhost:8000`.
+`8090`, Vite en Docker `5174` (perfil `dev`), Mailpit `8025` (perfil `dev`: ahí llegan
+TODOS los correos en desarrollo). `npm run dev` fuera de Docker usa `8080` o el siguiente
+libre y manda `/v1` a `localhost:8000`.

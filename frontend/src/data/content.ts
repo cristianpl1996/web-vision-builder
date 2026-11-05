@@ -26,7 +26,7 @@ export const FAQS = [
   },
   {
     q: "¿Cómo hago mi pedido?",
-    a: "Agrega al carrito las presentaciones que necesitas, crea tu cuenta y confirma tu dirección. Al final nos envías el pedido por WhatsApp y te confirmamos el precio, el envío y las opciones de pago.",
+    a: "Agrega al carrito las presentaciones que necesitas, crea tu cuenta y confirma tu dirección. Puedes pagar en línea con Mercado Pago (tarjeta, OXXO o transferencia) o enviarnos el pedido por WhatsApp para coordinar el pago. Te avisamos por correo cuando tu pedido salga, con la paquetería y el número de guía.",
   },
 ];
 

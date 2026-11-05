@@ -1,9 +1,11 @@
 import { Link } from "react-router-dom";
 import { Instagram, MessageCircle, ShieldCheck, Truck, CreditCard } from "lucide-react";
 import { Logo } from "@/components/layout/Logo";
-import { PRODUCTS, STORE } from "@/data/products";
+import { STORE } from "@/data/products";
+import { useCatalog } from "@/context/CatalogContext";
 
 export function Footer() {
+  const { products: PRODUCTS } = useCatalog();
   return (
     <footer
       className="relative isolate overflow-hidden text-primary-foreground"
@@ -17,7 +19,7 @@ export function Footer() {
           {[
             { icon: Truck, title: "Pedidos en línea", text: "Arma tu carrito y envíalo" },
             { icon: ShieldCheck, title: "Cuenta personal", text: "Consulta tus pedidos cuando quieras" },
-            { icon: CreditCard, title: "Atención por WhatsApp", text: "Te confirmamos pago y envío" },
+            { icon: CreditCard, title: "Pago seguro", text: "Mercado Pago o WhatsApp" },
           ].map(({ icon: Icon, title, text }) => (
             <div key={title} className="flex items-center gap-4">
               <div className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-white/10">

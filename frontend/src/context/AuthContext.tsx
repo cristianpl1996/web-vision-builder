@@ -1,13 +1,16 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
-import { authService, type RegisterInput, type User } from "@/services/auth";
+import { authService, type ProfilePatch, type RegisterInput, type User } from "@/services/auth";
 
 interface AuthContextValue {
   user: User | null;
   loading: boolean;
+  isAdmin: boolean;
   login: (email: string, password: string) => Promise<User>;
   register: (input: RegisterInput) => Promise<User>;
   logout: () => Promise<void>;
-  updateProfile: (patch: Partial<Omit<User, "id" | "email" | "createdAt">>) => Promise<User>;
+  updateProfile: (patch: ProfilePatch) => Promise<User>;
+  /** Para cuando otra acción devuelve el usuario actualizado (verificar correo, restablecer). */
+  setUser: (u: User | null) => void;
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null);
@@ -26,6 +29,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const value: AuthContextValue = {
     user,
     loading,
+    isAdmin: user?.role === "superadmin",
+    setUser,
     login: async (email, password) => {
       const u = await authService.login(email, password);
       setUser(u);
@@ -41,8 +46,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setUser(null);
     },
     updateProfile: async (patch) => {
-      if (!user) throw new Error("No hay sesión activa");
-      const u = await authService.updateProfile(user.id, patch);
+      const u = await authService.updateProfile(patch);
       setUser(u);
       return u;
     },

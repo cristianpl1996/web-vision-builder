@@ -13,12 +13,13 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Field } from "@/components/forms/Field";
 import { useCart } from "@/context/CartContext";
 import { useAuth } from "@/context/AuthContext";
-import { PRICES_READY, STORE } from "@/data/products";
+import { STORE } from "@/data/products";
 import { MX_STATES } from "@/data/content";
 import { formatPrice } from "@/lib/format";
-import { orderService } from "@/services/orders";
+import { orderService, type PaymentMethod } from "@/services/orders";
+import { shippingFor, useStoreConfig } from "@/services/store";
+import { ApiError } from "@/lib/api";
 import type { Address } from "@/services/auth";
-import { PAYMENT_METHODS, startPayment } from "@/services/payments";
 import { cn } from "@/lib/utils";
 
 const schema = z.object({
@@ -33,6 +34,7 @@ const schema = z.object({
   state: z.string().min(1, "Selecciona un estado"),
   references: z.string().trim().max(200).optional(),
   saveAddress: z.boolean().default(true),
+  notes: z.string().trim().max(500, "Máximo 500 caracteres").optional(),
 });
 type Values = z.infer<typeof schema>;
 
@@ -40,7 +42,26 @@ export default function CheckoutPage() {
   const { lines, subtotal, count, clear } = useCart();
   const { user, updateProfile } = useAuth();
   const navigate = useNavigate();
-  const [paymentId, setPaymentId] = useState(PAYMENT_METHODS.find((m) => m.enabled)?.id ?? "");
+  const { data: config, isLoading: configLoading } = useStoreConfig();
+  const [paymentId, setPaymentId] = useState<PaymentMethod | null>(null);
+  // Con Mercado Pago activo se propone tarjeta; si no, WhatsApp.
+  const metodo: PaymentMethod = paymentId ?? (config?.mercadopago ? "mercadopago" : "whatsapp");
+  const PAYMENT_METHODS = [
+    {
+      id: "mercadopago" as const,
+      label: "Tarjeta, OXXO o transferencia (Mercado Pago)",
+      description: config?.mercadopago
+        ? "Pagas en el sitio seguro de Mercado Pago y vuelves aquí."
+        : "Disponible muy pronto.",
+      enabled: !!config?.mercadopago,
+    },
+    {
+      id: "whatsapp" as const,
+      label: "Coordinar el pago por WhatsApp",
+      description: "Te enviamos los datos de pago por WhatsApp al recibir tu pedido.",
+      enabled: true,
+    },
+  ];
   const [summaryOpen, setSummaryOpen] = useState(false);
   const [placing, setPlacing] = useState(false);
 
@@ -69,8 +90,9 @@ export default function CheckoutPage() {
     document.title = "Finalizar compra · SINERGIA";
   }, []);
 
-  // Shipping is confirmed by WhatsApp, so the total is the products subtotal (when prices exist).
-  const total = PRICES_READY ? subtotal : null;
+  // Mismo cálculo que el servidor, solo para mostrar: el total que vale es el que devuelve la API.
+  const shipping = shippingFor(config, subtotal);
+  const total = subtotal + shipping;
 
   if (!placing && lines.length === 0) return <Navigate to="/" replace />;
   if (!user) return null;
@@ -78,30 +100,25 @@ export default function CheckoutPage() {
   const onSubmit = async (v: Values) => {
     setPlacing(true);
     try {
-      const { saveAddress, ...rest } = v;
+      const { saveAddress, notes, ...rest } = v;
       const address = rest as Address;
       if (saveAddress) {
         await updateProfile({ addresses: [address, ...user.addresses.filter((a) => a.postalCode !== address.postalCode || a.street !== address.street)].slice(0, 3) });
       }
-      const order = await orderService.create({
-        userId: user.id,
-        email: user.email,
-        items: lines.map((l) => ({ productId: l.productId, name: l.product.name, price: l.product.price, quantity: l.quantity, image: l.product.image })),
-        subtotal: total,
-        shipping: null,
-        total,
+      const { order, paymentUrl } = await orderService.create({
+        items: lines.map((l) => ({ productId: Number(l.productId), quantity: l.quantity })),
         address,
-        paymentMethod: paymentId,
+        paymentMethod: metodo,
+        notes: notes || undefined,
       });
-      const result = await startPayment(paymentId, order);
       clear();
-      if (result.type === "redirect") {
-        window.location.assign(result.url);
+      if (paymentUrl) {
+        window.location.assign(paymentUrl); // checkout de Mercado Pago
         return;
       }
       navigate(`/pedido/${order.id}`, { replace: true });
     } catch (e) {
-      toast.error((e as Error).message || "No pudimos procesar tu pedido. Intenta de nuevo.");
+      toast.error(e instanceof ApiError ? e.message : "No pudimos procesar tu pedido. Intenta de nuevo.");
       setPlacing(false);
     }
   };
@@ -134,30 +151,26 @@ export default function CheckoutPage() {
               <p className="truncate font-semibold">{product.name}</p>
               <p className="text-xs text-muted-foreground">{product.concentration} · {product.volume}</p>
             </div>
-            {PRICES_READY && <span className="price font-semibold">{formatPrice(lineTotal)}</span>}
+            <span className="price font-semibold">{formatPrice(lineTotal)}</span>
           </li>
         ))}
       </ul>
       <dl className="space-y-2 border-t pt-4 text-sm">
-        {total !== null && (
-          <div className="flex justify-between">
-            <dt className="text-muted-foreground">Subtotal</dt>
-            <dd className="price">{formatPrice(total)}</dd>
-          </div>
-        )}
-        <div className="flex justify-between gap-4">
-          <dt className="text-muted-foreground">{total === null ? "Precio y envío" : "Envío"}</dt>
-          <dd className="text-right font-medium">Por confirmar en WhatsApp</dd>
+        <div className="flex justify-between">
+          <dt className="text-muted-foreground">Subtotal</dt>
+          <dd className="price">{formatPrice(subtotal)}</dd>
         </div>
-        {total !== null && (
-          <div className="flex items-baseline justify-between border-t pt-3 text-base">
-            <dt className="font-semibold">Total productos</dt>
-            <dd className="price text-2xl font-bold">
-              <span className="mr-1 text-xs font-medium text-muted-foreground">{STORE.currency}</span>
-              {formatPrice(total)}
-            </dd>
-          </div>
-        )}
+        <div className="flex justify-between gap-4">
+          <dt className="text-muted-foreground">Envío</dt>
+          <dd className="price text-right font-medium">{shipping === 0 ? "Sin costo" : formatPrice(shipping)}</dd>
+        </div>
+        <div className="flex items-baseline justify-between border-t pt-3 text-base">
+          <dt className="font-semibold">Total</dt>
+          <dd className="price text-2xl font-bold">
+            <span className="mr-1 text-xs font-medium text-muted-foreground">{STORE.currency}</span>
+            {formatPrice(total)}
+          </dd>
+        </div>
       </dl>
     </div>
   );
@@ -249,6 +262,9 @@ export default function CheckoutPage() {
               <Field id="co-references" label="Referencias (opcional)" hint="Entre calles, color de fachada, etc." className="sm:col-span-6">
                 <Textarea rows={2} className="rounded-xl bg-card text-base" placeholder="Ej. Entre calle Durango y Colima, portón negro" {...reg("references")} />
               </Field>
+              <Field id="co-notes" label="Notas para tu pedido (opcional)" error={errors.notes?.message} className="sm:col-span-6">
+                <Textarea rows={2} className="rounded-xl bg-card text-base" placeholder="Ej. Entregar por la tarde" {...reg("notes")} />
+              </Field>
               <label className="flex cursor-pointer items-center gap-3 text-sm sm:col-span-6">
                 <Checkbox
                   checked={watch("saveAddress")}
@@ -269,7 +285,10 @@ export default function CheckoutPage() {
             <div className="flex items-start gap-4 rounded-2xl border bg-card p-4 sm:p-5">
               <Truck className="mt-0.5 h-5 w-5 shrink-0 text-primary" />
               <p className="text-sm text-muted-foreground">
-                El costo y el tiempo de envío a tu dirección te los confirmamos por WhatsApp al recibir tu pedido.
+                {shipping === 0 ? "Envío sin costo" : `Envío a domicilio: ${formatPrice(shipping)}`}
+                {config?.freeShippingFrom != null && shipping > 0 &&
+                  ` · gratis en compras desde ${formatPrice(config.freeShippingFrom)}`}
+                . Te avisamos por correo cuando tu pedido salga, con la paquetería y el número de guía.
               </p>
             </div>
           </section>
@@ -284,10 +303,10 @@ export default function CheckoutPage() {
               {PAYMENT_METHODS.map((m) => (
                 <OptionCard
                   key={m.id}
-                  selected={paymentId === m.id}
+                  selected={metodo === m.id}
                   disabled={!m.enabled}
                   onSelect={() => setPaymentId(m.id)}
-                  icon={m.id === "card" ? CreditCard : MessageCircle}
+                  icon={m.id === "mercadopago" ? CreditCard : MessageCircle}
                   title={m.label}
                   text={m.description}
                 >
@@ -305,9 +324,13 @@ export default function CheckoutPage() {
               <h2 className="mb-5 font-sans text-lg font-bold">Resumen del pedido</h2>
               {Summary}
             </div>
-            <Button type="submit" size="xl" className="w-full" disabled={placing || !paymentId}>
+            <Button type="submit" size="xl" className="w-full" disabled={placing || configLoading}>
               {placing ? <Loader2 className="animate-spin" /> : <Lock />}
-              {placing ? "Procesando pedido…" : total === null ? "Confirmar pedido" : `Confirmar pedido · ${formatPrice(total)}`}
+              {placing
+                ? "Procesando pedido…"
+                : metodo === "mercadopago"
+                  ? `Pagar ${formatPrice(total)}`
+                  : `Confirmar pedido · ${formatPrice(total)}`}
             </Button>
             <p className="flex items-center justify-center gap-2 text-center text-xs text-muted-foreground">
               <ShieldCheck className="h-4 w-4 text-primary" /> Tus datos solo se usan para procesar tu pedido.

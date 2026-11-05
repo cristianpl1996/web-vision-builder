@@ -4,7 +4,7 @@ import { useReveal } from "@/hooks/use-reveal";
 const steps = [
   { icon: ShoppingBag, title: "Elige tu presentación", text: "Agrega al carrito la presentación que mejor se adapte a tu mascota." },
   { icon: UserCheck, title: "Crea tu cuenta", text: "Solo al finalizar la compra. Guarda tus direcciones y consulta tus pedidos." },
-  { icon: PackageCheck, title: "Envíanos tu pedido", text: "Por WhatsApp te confirmamos el precio, el pago y el envío." },
+  { icon: PackageCheck, title: "Paga y recíbelo", text: "Paga en línea con Mercado Pago o coordina por WhatsApp. Te avisamos cuando salga, con número de guía." },
 ];
 
 /** "Cómo comprar" + safe-complement message */

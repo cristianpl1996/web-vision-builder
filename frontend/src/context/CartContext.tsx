@@ -1,6 +1,7 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useReducer, useState, type ReactNode } from "react";
 import { toast } from "sonner";
-import { getProductById, type Product } from "@/data/products";
+import type { Product } from "@/data/products";
+import { useCatalog } from "@/context/CatalogContext";
 import { readStorage, writeStorage } from "@/lib/format";
 
 export interface CartLine {
@@ -44,7 +45,7 @@ function reducer(state: CartLine[], action: Action): CartLine[] {
     case "clear":
       return [];
     case "replace":
-      return action.lines.filter((l) => getProductById(l.productId));
+      return action.lines;
   }
 }
 
@@ -67,13 +68,23 @@ interface CartContextValue {
 const CartContext = createContext<CartContextValue | null>(null);
 
 export function CartProvider({ children }: { children: ReactNode }) {
-  const [state, dispatch] = useReducer(reducer, undefined, () =>
-    readStorage<CartLine[]>(KEY, []).filter((l) => getProductById(l.productId)),
-  );
+  const { getById: getProductById, loading: catalogLoading, error: catalogError } = useCatalog();
+  const [state, dispatch] = useReducer(reducer, undefined, () => readStorage<CartLine[]>(KEY, []));
   const [isOpen, setOpen] = useState(false);
   const [bump, setBump] = useState(0);
 
   useEffect(() => writeStorage(KEY, state), [state]);
+
+  // Con el catálogo cargado, se quitan del carrito los productos que ya no se venden
+  // (borrados, ocultos o agotados). Mientras carga, el carrito guardado no se toca.
+  useEffect(() => {
+    if (catalogLoading || catalogError) return;
+    const vigentes = state.filter((l) => {
+      const p = getProductById(l.productId);
+      return p && !p.soldOut;
+    });
+    if (vigentes.length !== state.length) dispatch({ type: "replace", lines: vigentes });
+  }, [catalogLoading, catalogError, state, getProductById]);
 
   // Keep carts in sync across tabs
   useEffect(() => {
@@ -89,9 +100,9 @@ export function CartProvider({ children }: { children: ReactNode }) {
     () =>
       state.flatMap((l) => {
         const product = getProductById(l.productId);
-        return product ? [{ ...l, product, lineTotal: (product.price ?? 0) * l.quantity }] : [];
+        return product && !product.soldOut ? [{ ...l, product, lineTotal: (product.price ?? 0) * l.quantity }] : [];
       }),
-    [state],
+    [state, getProductById],
   );
 
   const count = lines.reduce((n, l) => n + l.quantity, 0);
@@ -104,7 +115,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
     setBump((b) => b + 1);
     if (opts?.openDrawer ?? true) setOpen(true);
     else toast.success(`${product.name} agregado al carrito`);
-  }, []);
+  }, [getProductById]);
 
   const remove = useCallback((productId: string) => {
     const product = getProductById(productId);
@@ -115,7 +126,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
         action: { label: "Deshacer", onClick: () => dispatch({ type: "add", productId, quantity: line.quantity }) },
       });
     }
-  }, [state]);
+  }, [state, getProductById]);
 
   const value: CartContextValue = {
     lines,

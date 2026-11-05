@@ -4,7 +4,7 @@ import { Sheet, SheetContent, SheetTitle, SheetDescription } from "@/components/
 import { Button } from "@/components/ui/button";
 import { useCart } from "@/context/CartContext";
 import { useAuth } from "@/context/AuthContext";
-import { PRICES_READY, PRODUCTS } from "@/data/products";
+import { useCatalog } from "@/context/CatalogContext";
 import { formatPrice, priceOrQuote } from "@/lib/format";
 import { QuantityStepper } from "./QuantityStepper";
 
@@ -13,7 +13,8 @@ export function CartDrawer() {
   const { user } = useAuth();
   const navigate = useNavigate();
 
-  const upsell = PRODUCTS.filter((p) => !lines.some((l) => l.productId === p.id)).slice(-2);
+  const { products, pricesReady: PRICES_READY } = useCatalog();
+  const upsell = products.filter((p) => !p.soldOut && !lines.some((l) => l.productId === p.id)).slice(0, 2);
 
   const checkout = () => {
     close();
@@ -117,7 +118,7 @@ export function CartDrawer() {
                 <span className="price text-xl font-bold">{PRICES_READY ? formatPrice(subtotal) : count}</span>
               </div>
               <p className="mt-1 flex items-center gap-1.5 text-xs text-muted-foreground">
-                <Info className="h-3.5 w-3.5 shrink-0" aria-hidden /> {PRICES_READY ? "Envío por confirmar al enviar tu pedido." : "Precio y envío te los confirmamos por WhatsApp."}
+                <Info className="h-3.5 w-3.5 shrink-0" aria-hidden /> {PRICES_READY ? "El envío se calcula al finalizar la compra." : "Precio y envío te los confirmamos por WhatsApp."}
               </p>
               <Button size="xl" className="mt-4 w-full" onClick={checkout}>
                 <Lock /> Finalizar compra

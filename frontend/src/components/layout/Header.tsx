@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { ShoppingBag, User, ChevronRight, LogOut, Package } from "lucide-react";
+import { ShoppingBag, User, ChevronRight, LogOut, Package, LayoutDashboard } from "lucide-react";
 import { Sheet, SheetContent, SheetDescription, SheetTitle } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { Logo } from "@/components/layout/Logo";
@@ -20,7 +20,7 @@ export function Header() {
   const { pathname } = useLocation();
   const navigate = useNavigate();
   const { count, open, bump } = useCart();
-  const { user, logout } = useAuth();
+  const { user, logout, isAdmin } = useAuth();
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
 
@@ -100,6 +100,11 @@ export function Header() {
         </nav>
 
         <div className="flex items-center gap-1 -mr-2.5 -translate-y-2 lg:translate-y-0">
+          {isAdmin && (
+            <Link to="/admin" className={cn(iconBtn, "hidden sm:grid")} aria-label="Panel de administración" title="Panel de administración">
+              <LayoutDashboard className="h-[22px] w-[22px]" />
+            </Link>
+          )}
           <Link
             to={user ? "/cuenta" : "/ingresar"}
             className={cn(iconBtn, "hidden sm:grid")}
@@ -165,6 +170,13 @@ export function Header() {
                     <Package /> Mis pedidos
                   </Link>
                 </Button>
+                {isAdmin && (
+                  <Button asChild variant="outline" className="w-full justify-start" onClick={() => setMenuOpen(false)}>
+                    <Link to="/admin">
+                      <LayoutDashboard /> Panel de administración
+                    </Link>
+                  </Button>
+                )}
                 <Button
                   variant="ghost"
                   className="w-full justify-start text-muted-foreground"

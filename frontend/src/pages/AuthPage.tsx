@@ -14,7 +14,7 @@ import { PasswordInput } from "@/components/auth/PasswordInput";
 import { useAuth } from "@/context/AuthContext";
 import { useCart } from "@/context/CartContext";
 import { formatPrice } from "@/lib/format";
-import { PRICES_READY } from "@/data/products";
+import { useCatalog } from "@/context/CatalogContext";
 import { cn } from "@/lib/utils";
 
 const loginSchema = z.object({
@@ -51,6 +51,7 @@ export default function AuthPage() {
   const [mode, setMode] = useState<"login" | "register">(params.get("modo") === "registro" ? "register" : "login");
   const { user, loading } = useAuth();
   const { count, subtotal } = useCart();
+  const { pricesReady: PRICES_READY } = useCatalog();
 
   useEffect(() => {
     document.title = (mode === "login" ? "Iniciar sesión" : "Crear cuenta") + " · SINERGIA";
@@ -173,6 +174,11 @@ function LoginForm({ redirect, onSwitch }: { redirect: string; onSwitch: () => v
       <Field id="login-password" label="Contraseña" error={errors.password?.message}>
         <PasswordInput id="login-password" placeholder="Escribe tu contraseña" autoComplete="current-password" aria-invalid={!!errors.password} aria-describedby="login-password-msg" {...register("password")} />
       </Field>
+      <p className="-mt-2 text-right text-sm">
+        <Link to="/recuperar" className="font-semibold text-primary hover:underline">
+          ¿Olvidaste tu contraseña?
+        </Link>
+      </p>
       <Button type="submit" size="xl" className="w-full" disabled={isSubmitting}>
         {isSubmitting ? <Loader2 className="animate-spin" /> : <Lock />}
         {isSubmitting ? "Ingresando…" : "Iniciar sesión"}
@@ -203,7 +209,7 @@ function RegisterForm({ redirect, onSwitch }: { redirect: string; onSwitch: () =
     setServerError(null);
     try {
       const u = await registerUser({ firstName: v.firstName, lastName: v.lastName, email: v.email, phone: v.phone, password: v.password });
-      toast.success(`¡Bienvenido, ${u.firstName}! Tu cuenta fue creada.`);
+      toast.success(`¡Bienvenido, ${u.firstName}! Te enviamos un correo para confirmar tu cuenta.`);
       navigate(redirect, { replace: true });
     } catch (e) {
       setServerError((e as Error).message);

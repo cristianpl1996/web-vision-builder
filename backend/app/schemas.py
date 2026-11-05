@@ -40,8 +40,10 @@ class Registro(BaseModel):
 
 
 class Login(BaseModel):
-    email: EmailStr
-    password: str
+    # Sin EmailStr: para entrar basta con comparar contra la cuenta (y así no se rechazan
+    # dominios internos válidos como el del superadmin de desarrollo).
+    email: str = Field(min_length=3, max_length=254)
+    password: str = Field(max_length=200)
 
 
 class Token(BaseModel):
@@ -63,7 +65,7 @@ class CambiarPassword(BaseModel):
 
 
 class Olvide(BaseModel):
-    email: EmailStr
+    email: str = Field(min_length=3, max_length=254)
 
 
 class PerfilCambios(BaseModel):

@@ -1,76 +1,97 @@
 /**
- * Orders service. Same idea as auth: swap `localOrderService` for your API.
- * In production, totals MUST be recalculated on the server from product IDs —
- * never trust prices sent by the browser.
+ * Órdenes contra la API. El total lo calcula el servidor: aquí solo se mandan ids y cantidades.
  */
+import { api } from "@/lib/api";
 import type { Address } from "@/services/auth";
-import { readStorage, writeStorage } from "@/lib/format";
 
-export type OrderStatus = "pending_payment" | "paid" | "shipped" | "delivered" | "cancelled";
+export type OrderStatus = "pendiente_pago" | "pagada" | "preparando" | "enviada" | "entregada" | "cancelada";
+export type PaymentMethod = "mercadopago" | "whatsapp";
 
 export interface OrderItem {
-  productId: string;
+  productId: number | null;
   name: string;
-  price: number | null;
+  price: number;
   quantity: number;
-  image: string;
+  image: string | null;
+}
+
+export interface OrderEvent {
+  estado: OrderStatus;
+  nota: string;
+  por: string;
+  fecha: string;
 }
 
 export interface Order {
-  id: string;
+  id: number;
   number: string;
-  userId: string;
   email: string;
+  customerName: string;
   items: OrderItem[];
-  /** `null` while prices and shipping are confirmed by WhatsApp. */
-  subtotal: number | null;
-  shipping: number | null;
-  total: number | null;
+  subtotal: number;
+  shipping: number;
+  total: number;
   address: Address;
-  paymentMethod: string;
+  paymentMethod: PaymentMethod;
   status: OrderStatus;
-  notes?: string;
+  carrier: string | null;
+  tracking: string | null;
+  paymentUrl: string | null;
+  notes: string;
+  events: OrderEvent[];
   createdAt: string;
 }
 
-export type NewOrder = Omit<Order, "id" | "number" | "status" | "createdAt">;
-
-export interface OrderService {
-  create(order: NewOrder): Promise<Order>;
-  listByUser(userId: string): Promise<Order[]>;
-  get(id: string): Promise<Order | null>;
+export interface NewOrder {
+  items: { productId: number; quantity: number }[];
+  address: Address;
+  paymentMethod: PaymentMethod;
+  notes?: string;
 }
 
-const KEY = "sinergia.orders";
+interface Created {
+  order: Order;
+  paymentUrl: string | null;
+}
 
-export const localOrderService: OrderService = {
-  async create(input) {
-    await new Promise((r) => setTimeout(r, 600));
-    const orders = readStorage<Order[]>(KEY, []);
-    const order: Order = {
-      ...input,
-      id: typeof crypto.randomUUID === "function" ? crypto.randomUUID() : String(Date.now()),
-      number: `SIN-${String(Date.now()).slice(-6)}`,
-      status: "pending_payment",
-      createdAt: new Date().toISOString(),
-    };
-    writeStorage(KEY, [order, ...orders]);
-    return order;
-  },
-  async listByUser(userId) {
-    return readStorage<Order[]>(KEY, []).filter((o) => o.userId === userId);
-  },
-  async get(id) {
-    return readStorage<Order[]>(KEY, []).find((o) => o.id === id) ?? null;
-  },
+export const orderService = {
+  create: (o: NewOrder) => api<Created>("/ordenes", { method: "POST", body: o }),
+  listMine: () => api<Order[]>("/ordenes"),
+  get: (id: number | string) => api<Order>(`/ordenes/${id}`),
+  retryPayment: (id: number) => api<Created>(`/ordenes/${id}/pago`, { method: "POST" }),
+  verifyPayment: (id: number | string) => api<Order>(`/ordenes/${id}/verificar-pago`, { method: "POST" }),
 };
 
-export const orderService: OrderService = localOrderService;
-
 export const ORDER_STATUS_LABEL: Record<OrderStatus, string> = {
-  pending_payment: "Pendiente de pago",
-  paid: "Pagado",
-  shipped: "Enviado",
-  delivered: "Entregado",
-  cancelled: "Cancelado",
+  pendiente_pago: "Pendiente de pago",
+  pagada: "Pagado",
+  preparando: "En preparación",
+  enviada: "Enviado",
+  entregada: "Entregado",
+  cancelada: "Cancelado",
+};
+
+/** Colores de la etiqueta de estado (texto + fondo, con contraste AA). */
+export const ORDER_STATUS_TONE: Record<OrderStatus, string> = {
+  pendiente_pago: "bg-amber-100 text-amber-900",
+  pagada: "bg-emerald-100 text-emerald-900",
+  preparando: "bg-sky-100 text-sky-900",
+  enviada: "bg-indigo-100 text-indigo-900",
+  entregada: "bg-primary/15 text-primary",
+  cancelada: "bg-red-100 text-red-900",
+};
+
+/** Espejo de `TRANSICIONES` en backend/app/services/ordenes.py (el backend es quien valida). */
+export const NEXT_STATUSES: Record<OrderStatus, OrderStatus[]> = {
+  pendiente_pago: ["pagada", "cancelada"],
+  pagada: ["preparando", "enviada", "cancelada"],
+  preparando: ["enviada", "cancelada"],
+  enviada: ["entregada"],
+  entregada: [],
+  cancelada: [],
+};
+
+export const PAYMENT_LABEL: Record<PaymentMethod, string> = {
+  mercadopago: "Mercado Pago",
+  whatsapp: "Coordinado por WhatsApp",
 };

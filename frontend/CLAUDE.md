@@ -17,10 +17,11 @@
 - Todo texto del producto sale de BOTICAN (landing anterior o el documento del doctor).
   No inventar certificaciones, cifras ni beneficios.
 - Terpenos: **Linalol, Mirceno, Nerodiol** (así lo pidió el doctor, con D).
-- Tienda ordenada de mayor a menor presentación (1500 → 250 mg). SINERGIA tiene 8
-  presentaciones; las 3 que faltan son tarjetas «Próximamente» (`UPCOMING_SLOTS` en
-  `src/data/products.ts`) hasta que BOTICAN mande datos y fotos.
-- Los frascos se dibujan en escalera por mg (`BOTTLE_SCALE`).
+- El catálogo se administra en el panel (`/admin › Productos`) y llega de la API. La tienda
+  muestra los productos en su campo «orden» (1500 → 250 mg). Las 3 presentaciones que faltan
+  son productos en estado «Próximamente» hasta que BOTICAN mande datos y fotos.
+- Los frascos se dibujan en escalera por mg dentro de cada línea (`toShopItems` en
+  `src/data/products.ts`). La primera foto de cada producto debe ser el frasco recortado.
 
 ## Responsive
 Celular primero. Revisar a 375 y 1440 px como mínimo; nunca scroll horizontal. Los
@@ -28,5 +29,6 @@ botones miden 44 px de alto o más. El ícono de menú está alineado al alto de
 SINERGIA del logo (si cambia el logo, recalibrar en `components/layout/Header.tsx`).
 
 ## Datos
-`src/services/*` son interfaces: hoy implementación local (localStorage), mañana la API
-(`/v1`). Las pantallas no llaman a `fetch` directamente.
+Las pantallas hablan con la API solo a través de `src/services/*` y `src/lib/api.ts`
+(el token de sesión va en localStorage). Lo que se lee del servidor usa React Query.
+El panel vive en `src/pages/admin/` (Órdenes, Productos, Ajustes).
