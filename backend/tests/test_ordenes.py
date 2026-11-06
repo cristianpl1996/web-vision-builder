@@ -1,7 +1,7 @@
 from tests.conftest import DIRECCION, auth, crear_producto, registrar
 
 
-def orden(producto_id: int, cantidad: int = 1, metodo: str = "whatsapp", **extra) -> dict:
+def orden(producto_id: int, cantidad: int = 1, metodo: str = "transferencia", **extra) -> dict:
     return {
         "items": [{"productId": producto_id, "quantity": cantidad, **extra}],
         "address": DIRECCION,
@@ -98,3 +98,32 @@ async def test_tarjeta_solo_si_mercado_pago_esta_configurado(api, admin, correos
     assert (await api.get("/v1/tienda")).json()["mercadopago"] is False
     r = await api.post("/v1/ordenes", json=orden(p["id"], metodo="mercadopago"), headers=auth(cliente))
     assert r.status_code == 409
+
+
+async def test_cobro_en_dolares_con_el_tipo_de_cambio(api, admin, correos):
+    p = await crear_producto(api, admin, precio=1590)
+    cliente = await registrar(api)
+    en_usd = {**orden(p["id"]), "currency": "USD"}
+    # Sin tipo de cambio en Ajustes no se vende en dólares.
+    assert (await api.post("/v1/ordenes", json=en_usd, headers=auth(cliente))).status_code == 422
+
+    ajustes = {"tipo_cambio_usd": "18.5", "envio_costo": "149", "envio_gratis_desde": "3000"}
+    await api.put("/v1/admin/ajustes", json=ajustes, headers=auth(admin))
+    assert (await api.get("/v1/tienda")).json()["usdRate"] == 18.5
+    o = (await api.post("/v1/ordenes", json=en_usd, headers=auth(cliente))).json()["order"]
+    # 1590 / 18.5 = 85.9 → 86 USD; envío 149 / 18.5 = 8.05 → 9 USD (dólares enteros, hacia arriba).
+    assert (o["currency"], o["exchangeRate"]) == ("USD", 18.5)
+    assert (o["items"][0]["price"], o["subtotal"], o["shipping"], o["total"]) == (86, 86, 9, 95)
+    assert any("$95 USD" in c["asunto"] or "$95 USD" in c["html"] for c in correos)
+    # El envío gratis se decide en pesos: 2 × 1590 = 3180 ≥ 3000.
+    dos = await api.post("/v1/ordenes", json={**orden(p["id"], 2), "currency": "USD"}, headers=auth(cliente))
+    assert (dos.json()["order"]["shipping"], dos.json()["order"]["total"]) == (0, 172)
+    # En pesos nada cambia.
+    mxn = (await api.post("/v1/ordenes", json=orden(p["id"]), headers=auth(cliente))).json()["order"]
+    assert (mxn["currency"], mxn["total"]) == ("MXN", 1739)
+
+
+async def test_tipo_de_cambio_fuera_de_rango_se_rechaza(api, admin):
+    for malo in ("inf", "0", "abc", "100000"):
+        r = await api.put("/v1/admin/ajustes", json={"tipo_cambio_usd": malo}, headers=auth(admin))
+        assert r.status_code == 422, malo

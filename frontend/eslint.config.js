@@ -5,7 +5,8 @@ import reactRefresh from "eslint-plugin-react-refresh";
 import tseslint from "typescript-eslint";
 
 export default tseslint.config(
-  { ignores: ["dist"] },
+  // components/ui es shadcn copiado tal cual: no se mide (igual que el árbitro).
+  { ignores: ["dist", "src/components/ui"] },
   {
     extends: [js.configs.recommended, ...tseslint.configs.recommended],
     files: ["**/*.{ts,tsx}"],
@@ -19,7 +20,11 @@ export default tseslint.config(
     },
     rules: {
       ...reactHooks.configs.recommended.rules,
-      "react-refresh/only-export-components": ["warn", { allowConstantExport: true }],
+      // Los contextos exportan su Provider y su hook juntos (patrón de React): no rompe la recarga.
+      "react-refresh/only-export-components": [
+        "warn",
+        { allowConstantExport: true, allowExportNames: ["useAuth", "useCart", "useCatalog", "useCurrency"] },
+      ],
       "@typescript-eslint/no-unused-vars": "off",
     },
   },

@@ -1,15 +1,17 @@
 import { ShoppingBag, UserCheck, PackageCheck } from "lucide-react";
 import { useReveal } from "@/hooks/use-reveal";
+import { paymentPhrase, useStoreConfig } from "@/services/store";
 
 const steps = [
   { icon: ShoppingBag, title: "Elige tu presentación", text: "Agrega al carrito la presentación que mejor se adapte a tu mascota." },
   { icon: UserCheck, title: "Crea tu cuenta", text: "Solo al finalizar la compra. Guarda tus direcciones y consulta tus pedidos." },
-  { icon: PackageCheck, title: "Paga y recíbelo", text: "Paga en línea con Mercado Pago o coordina por WhatsApp. Te avisamos cuando salga, con número de guía." },
+  { icon: PackageCheck, title: "Paga y recíbelo", text: "Paga {formas_de_pago}. Te avisamos cuando salga, con número de guía." },
 ];
 
 /** "Cómo comprar" + safe-complement message */
 const InteractionsSection = () => {
   const ref = useReveal<HTMLElement>();
+  const { data: config } = useStoreConfig();
   return (
     <section ref={ref} className="section bg-card" aria-labelledby="como-comprar-title">
       <div className="container">
@@ -32,7 +34,7 @@ const InteractionsSection = () => {
               </div>
               <div>
                 <h3 className="font-display text-xl font-medium sm:text-2xl">{title}</h3>
-                <p className="mt-2 text-muted-foreground">{text}</p>
+                <p className="mt-2 text-muted-foreground">{text.replace("{formas_de_pago}", paymentPhrase(config))}</p>
               </div>
             </li>
           ))}

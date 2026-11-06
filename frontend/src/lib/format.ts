@@ -1,23 +1,32 @@
 import { STORE } from "@/data/products";
 
-const currencyFmt = new Intl.NumberFormat(STORE.locale, {
-  style: "currency",
-  currency: STORE.currency,
-  maximumFractionDigits: 0,
-});
+export type Currency = "MXN" | "USD";
 
-export const formatPrice = (value: number) => currencyFmt.format(value);
+const fmt = (currency: Currency, decimals: number) =>
+  new Intl.NumberFormat(STORE.locale, {
+    style: "currency",
+    currency,
+    currencyDisplay: "narrowSymbol",
+    minimumFractionDigits: decimals,
+    maximumFractionDigits: decimals,
+  });
+const FMT = { MXN: [fmt("MXN", 0), fmt("MXN", 2)], USD: [fmt("USD", 0), fmt("USD", 2)] } as const;
 
-const preciseFmt = new Intl.NumberFormat(STORE.locale, {
-  style: "currency",
-  currency: STORE.currency,
-  minimumFractionDigits: 2,
-  maximumFractionDigits: 2,
-});
-export const formatPricePrecise = (value: number) => preciseFmt.format(value);
+/** «$1,590» en pesos; «$86 USD» en dólares (el símbolo solo no distingue la moneda). */
+export const formatMoney = (value: number, currency: Currency = "MXN") =>
+  currency === "USD" ? `${FMT.USD[0].format(value)} USD` : FMT.MXN[0].format(value);
+export const formatMoneyPrecise = (value: number, currency: Currency = "MXN") =>
+  currency === "USD" ? `${FMT.USD[1].format(value)} USD` : FMT.MXN[1].format(value);
+/**
+ * Pesos → dólares con la MISMA regla que `services/ordenes.convertir` del backend: dólares
+ * enteros redondeados hacia arriba (con un redondeo previo a 6 decimales contra el ruido de
+ * los flotantes). Solo para mostrar: el total que vale lo calcula el servidor.
+ */
+export const convertirPesos = (pesos: number, rate: number | null) =>
+  rate ? Math.ceil(Number((pesos / rate).toFixed(6))) : pesos;
 
-/** Price or the agreed wording when it hasn't been confirmed yet. */
-export const priceOrQuote = (value: number | null) => (value === null ? "Precio por WhatsApp" : formatPrice(value));
+/** Pesos (lo que se configura en el panel). */
+export const formatPrice = (value: number) => formatMoney(value, "MXN");
 
 export const formatDate = (iso: string) =>
   new Intl.DateTimeFormat(STORE.locale, { dateStyle: "long", timeStyle: "short" }).format(new Date(iso));

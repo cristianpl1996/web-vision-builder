@@ -1,8 +1,7 @@
-"""Catálogo: lo que ve la tienda y lo que administra el superadmin (incluidas las fotos)."""
+"""Catálogo: lo que ve la tienda y lo que administra el panel (incluidas las fotos)."""
 
 import asyncio
 import secrets
-from pathlib import Path
 
 from fastapi import APIRouter, HTTPException, UploadFile, status
 from sqlalchemy import select
@@ -12,25 +11,12 @@ from app import schemas
 from app.config import settings
 from app.modelos import Foto, Producto
 from app.seguridad import Admin, Db
+from app.services import archivos
 
 router = APIRouter(tags=["productos"])
 
 VISIBLES = ("publicado", "agotado", "proximamente")
 MAX_FOTO = 5 * 1024 * 1024
-# Se valida por los primeros bytes, no por la extensión ni el content-type que manda el navegador.
-FIRMAS = {b"\xff\xd8\xff": "jpg", b"\x89PNG\r\n\x1a\n": "png"}
-
-
-def _tipo_imagen(cabeza: bytes) -> str | None:
-    if cabeza[:4] == b"RIFF" and cabeza[8:12] == b"WEBP":
-        return "webp"
-    return next((ext for firma, ext in FIRMAS.items() if cabeza.startswith(firma)), None)
-
-
-def _guardar(nombre: str, contenido: bytes) -> None:
-    destino = Path(settings.media_dir)
-    destino.mkdir(parents=True, exist_ok=True)
-    (destino / nombre).write_bytes(contenido)
 
 
 async def _producto(db, producto_id: int) -> Producto:
@@ -116,11 +102,11 @@ async def admin_subir_foto(producto_id: int, archivo: UploadFile, _: Admin, db: 
     contenido = await archivo.read(MAX_FOTO + 1)
     if len(contenido) > MAX_FOTO:
         raise HTTPException(status.HTTP_413_CONTENT_TOO_LARGE, "La foto pesa más de 5 MB.")
-    ext = _tipo_imagen(contenido[:16])
+    ext = archivos.tipo_imagen(contenido[:16])
     if ext is None:
         raise HTTPException(status.HTTP_415_UNSUPPORTED_MEDIA_TYPE, "Sube una foto JPG, PNG o WebP.")
     nombre = f"{secrets.token_hex(12)}.{ext}"
-    await asyncio.to_thread(_guardar, nombre, contenido)
+    await asyncio.to_thread(archivos.guardar, settings.media_dir, nombre, contenido)
     p.fotos.append(Foto(archivo=nombre, orden=len(p.fotos)))
     await db.commit()
     await db.refresh(p, ["fotos"])

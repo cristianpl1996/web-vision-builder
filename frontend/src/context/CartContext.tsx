@@ -2,6 +2,7 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useReducer,
 import { toast } from "sonner";
 import type { Product } from "@/data/products";
 import { useCatalog } from "@/context/CatalogContext";
+import { useCurrency } from "@/context/CurrencyContext";
 import { readStorage, writeStorage } from "@/lib/format";
 
 export interface CartLine {
@@ -11,6 +12,7 @@ export interface CartLine {
 
 export interface CartLineDetailed extends CartLine {
   product: Product;
+  /** En la moneda elegida. */
   lineTotal: number;
 }
 
@@ -52,8 +54,10 @@ function reducer(state: CartLine[], action: Action): CartLine[] {
 interface CartContextValue {
   lines: CartLineDetailed[];
   count: number;
-  /** Sum of known prices (0 while prices are pending). */
+  /** Suma en la moneda elegida (0 mientras no haya precios). */
   subtotal: number;
+  /** La misma suma en pesos: el envío gratis se decide en pesos. */
+  subtotalPesos: number;
   isOpen: boolean;
   bump: number;
   open: () => void;
@@ -70,6 +74,7 @@ const CartContext = createContext<CartContextValue | null>(null);
 export function CartProvider({ children }: { children: ReactNode }) {
   const { getById: getProductById, loading: catalogLoading, error: catalogError } = useCatalog();
   const [state, dispatch] = useReducer(reducer, undefined, () => readStorage<CartLine[]>(KEY, []));
+  const { convert } = useCurrency();
   const [isOpen, setOpen] = useState(false);
   const [bump, setBump] = useState(0);
 
@@ -100,13 +105,16 @@ export function CartProvider({ children }: { children: ReactNode }) {
     () =>
       state.flatMap((l) => {
         const product = getProductById(l.productId);
-        return product && !product.soldOut ? [{ ...l, product, lineTotal: (product.price ?? 0) * l.quantity }] : [];
+        return product && !product.soldOut
+          ? [{ ...l, product, lineTotal: convert(product.price ?? 0) * l.quantity }]
+          : [];
       }),
-    [state, getProductById],
+    [state, getProductById, convert],
   );
 
   const count = lines.reduce((n, l) => n + l.quantity, 0);
   const subtotal = lines.reduce((n, l) => n + l.lineTotal, 0);
+  const subtotalPesos = lines.reduce((n, l) => n + (l.product.price ?? 0) * l.quantity, 0);
 
   const add = useCallback<CartContextValue["add"]>((productId, quantity = 1, opts) => {
     const product = getProductById(productId);
@@ -132,6 +140,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
     lines,
     count,
     subtotal,
+    subtotalPesos,
     isOpen,
     bump,
     open: () => setOpen(true),

@@ -43,13 +43,19 @@ async def restablecer_password(email: str, nombre: str, token: str) -> None:
     )
 
 
+METODOS = {"mercadopago": "Mercado Pago", "transferencia": "Transferencia"}
+
+
 async def orden_creada(orden: Orden) -> None:
-    pago = (
-        "<p>Para completar tu compra, termina el pago con Mercado Pago.</p>"
-        if orden.metodo_pago == "mercadopago"
-        else "<p>Te escribiremos por WhatsApp para confirmar el pago y el envío.</p>"
-    )
-    boton = ("Pagar ahora", orden.pago_url) if orden.metodo_pago == "mercadopago" and orden.pago_url else None
+    if orden.metodo_pago == "mercadopago":
+        pago = "<p>Para completar tu compra, termina el pago con Mercado Pago.</p>"
+        boton = ("Pagar ahora", orden.pago_url) if orden.pago_url else ("Ver mi pedido", _url(f"/pedido/{orden.id}"))
+    else:
+        pago = (
+            "<p>Para completar tu compra, haz la transferencia por el total y sube tu comprobante en tu pedido. "
+            "En cuanto lo revisemos, te confirmamos el pago.</p>"
+        )
+        boton = ("Ver datos de pago y subir comprobante", _url(f"/pedido/{orden.id}"))
     await correo.enviar(
         orden.email,
         f"Recibimos tu pedido {orden.numero}",
@@ -57,11 +63,41 @@ async def orden_creada(orden: Orden) -> None:
     )
     await correo.enviar(
         await _correo_avisos(),
-        f"Nueva orden {orden.numero} · {correo.pesos(orden.total)}",
+        f"Nueva orden {orden.numero} · {correo.dinero(orden.total, orden.moneda)}",
         correo.plantilla(
             f"Nueva orden {orden.numero}",
             f"<p>{escape(orden.direccion.get('fullName', ''))} · {escape(orden.email)} · "
-            f"pago: {escape(orden.metodo_pago)}</p>" + correo.resumen_orden(orden),
+            f"pago: {METODOS.get(orden.metodo_pago, orden.metodo_pago)}</p>" + correo.resumen_orden(orden),
+            ("Ver en el panel", _url("/admin")),
+        ),
+    )
+
+
+async def comprobante_recibido(orden: Orden) -> None:
+    """Al panel: hay un comprobante por revisar. Al revisarlo, se marca la orden como «pagada»."""
+    await correo.enviar(
+        await _correo_avisos(),
+        f"Comprobante de pago {orden.numero} · {correo.dinero(orden.total, orden.moneda)}",
+        correo.plantilla(
+            f"Comprobante de pago {orden.numero}",
+            f"<p>{escape(orden.direccion.get('fullName', ''))} · {escape(orden.email)} subió su comprobante. "
+            "Revísalo en el panel y, si el dinero ya llegó, marca la orden como «Pagada».</p>"
+            + correo.resumen_orden(orden),
+            ("Revisar en el panel", _url("/admin")),
+        ),
+    )
+
+
+async def pago_no_coincide(orden: Orden, monto: float, moneda: str) -> None:
+    """Mercado Pago aprobó un pago que no es por el total o la moneda de la orden: revisar a mano."""
+    await correo.enviar(
+        await _correo_avisos(),
+        f"Revisar pago de {orden.numero}: no coincide con el total",
+        correo.plantilla(
+            f"Revisar pago {orden.numero}",
+            f"<p>Mercado Pago aprobó un pago por <b>{monto:,.2f} {escape(moneda)}</b>, pero la orden es por "
+            f"<b>{correo.dinero(orden.total, orden.moneda)}</b>. La orden sigue pendiente de pago: revísala en "
+            "Mercado Pago y en el panel antes de despacharla.</p>",
             ("Ver en el panel", _url("/admin")),
         ),
     )
@@ -79,7 +115,7 @@ async def orden_pagada(orden: Orden) -> None:
     )
     await correo.enviar(
         await _correo_avisos(),
-        f"Pago recibido {orden.numero} · {correo.pesos(orden.total)}",
+        f"Pago recibido {orden.numero} · {correo.dinero(orden.total, orden.moneda)}",
         correo.plantilla(
             f"Pago recibido {orden.numero}", correo.resumen_orden(orden), ("Ver en el panel", _url("/admin"))
         ),

@@ -91,6 +91,7 @@ async def test_webhook_con_firma_falsa_se_rechaza(api, admin, mp, correos):
 
 
 async def test_monto_distinto_no_marca_pagada(api, admin, mp, correos):
+    await api.put("/v1/admin/ajustes", json={"correo_avisos": "pedidos@botican.mx"}, headers=auth(admin))
     cliente, creada = await _orden_mp(api, admin)
     oid = creada["order"]["id"]
     mp["7"] = {
@@ -104,6 +105,9 @@ async def test_monto_distinto_no_marca_pagada(api, admin, mp, correos):
     o = (await api.get(f"/v1/ordenes/{oid}", headers=auth(cliente))).json()
     assert o["status"] == "pendiente_pago"
     assert "no coincide" in o["events"][-1]["nota"]
+    # Además, la tienda recibe un aviso para revisarlo a mano.
+    aviso = [c for c in correos if c["para"] == "pedidos@botican.mx" and "no coincide" in c["asunto"]]
+    assert len(aviso) == 1 and "1.00 MXN" in aviso[0]["html"]
 
 
 async def test_al_volver_se_verifica_contra_mercado_pago(api, admin, mp, correos):
@@ -127,3 +131,27 @@ def test_firma_valida_segun_la_documentacion_de_mp():
     assert mercadopago.firma_valida(SECRETO, firmar("abc")["x-signature"], "req-1", "ABC")
     assert not mercadopago.firma_valida(SECRETO, "ts=1700000000,v1=00", "req-1", "abc")
     assert not mercadopago.firma_valida(SECRETO, "", "req-1", "abc")
+
+
+async def test_mercado_pago_en_dolares_solo_si_la_cuenta_lo_acepta(api, admin, mp, correos):
+    p = await crear_producto(api, admin, precio=1590)
+    cliente = await registrar(api)
+    await api.put("/v1/admin/ajustes", json={"tipo_cambio_usd": "18.5"}, headers=auth(admin))
+    en_usd = {**orden(p["id"], metodo="mercadopago"), "currency": "USD"}
+    r = await api.post("/v1/ordenes", json=en_usd, headers=auth(cliente))
+    assert r.status_code == 409 and "dólares" in r.json()["detail"]
+    assert (await api.get("/v1/tienda")).json()["mercadopagoUsd"] is False
+
+    await api.put("/v1/admin/ajustes", json={"mp_usd": "1"}, headers=auth(admin))
+    assert (await api.get("/v1/tienda")).json()["mercadopagoUsd"] is True
+    r = await api.post("/v1/ordenes", json=en_usd, headers=auth(cliente))
+    assert r.status_code == 201, r.text
+    oid = r.json()["order"]["id"]
+    # 86 en pesos NO paga una orden de 86 dólares: la moneda tiene que coincidir.
+    base = {"status": "approved", "external_reference": str(oid), "transaction_amount": 86}
+    mp["20"] = {"id": 20, **base, "currency_id": "MXN"}
+    await api.post("/v1/pagos/webhook/mercadopago?type=payment&data.id=20", json={}, headers=firmar("20"))
+    assert (await api.get(f"/v1/ordenes/{oid}", headers=auth(cliente))).json()["status"] == "pendiente_pago"
+    mp["21"] = {"id": 21, **base, "currency_id": "USD"}
+    await api.post("/v1/pagos/webhook/mercadopago?type=payment&data.id=21", json={}, headers=firmar("21"))
+    assert (await api.get(f"/v1/ordenes/{oid}", headers=auth(cliente))).json()["status"] == "pagada"

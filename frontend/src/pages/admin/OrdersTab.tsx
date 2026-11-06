@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { keepPreviousData, useQuery, useQueryClient } from "@tanstack/react-query";
-import { ChevronLeft, ChevronRight, Loader2, Search } from "lucide-react";
+import { ChevronLeft, ChevronRight, Loader2, Paperclip, Search } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -17,7 +17,7 @@ import {
   type OrderStatus,
 } from "@/services/orders";
 import { ApiError } from "@/lib/api";
-import { formatDate, formatPrice } from "@/lib/format";
+import { formatDate, formatMoney } from "@/lib/format";
 
 const POR_PAGINA = 25;
 const selectCls = "h-11 w-full cursor-pointer rounded-xl border border-input bg-card px-3 text-sm";
@@ -112,8 +112,13 @@ export function OrdersTab() {
                       {formatDate(o.createdAt)} · {o.items.reduce((n, i) => n + i.quantity, 0)} artículos ·{" "}
                       {PAYMENT_LABEL[o.paymentMethod]}
                     </p>
+                    {o.status === "pendiente_pago" && o.hasReceipt && (
+                      <p className="mt-1 inline-flex items-center gap-1 rounded-full bg-amber-100 px-2.5 py-0.5 text-xs font-semibold text-amber-900">
+                        <Paperclip className="h-3 w-3" /> Comprobante por revisar
+                      </p>
+                    )}
                   </div>
-                  <span className="price font-bold">{formatPrice(o.total)}</span>
+                  <span className="price font-bold">{formatMoney(o.total, o.currency)}</span>
                   <StatusBadge status={o.status} className="justify-self-start" />
                 </button>
               </li>
@@ -209,6 +214,27 @@ function OrderDetail({ order, onChanged }: { order: Order; onChanged: (o: Order)
               <OrderTotals order={order} />
             </section>
 
+            {order.hasReceipt && (
+              <section className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-amber-200 bg-amber-50 p-4">
+                <div className="text-sm">
+                  <p className="font-semibold text-amber-950">Comprobante de pago</p>
+                  <p className="text-amber-900/80">
+                    {order.receiptAt && `Subido el ${formatDate(order.receiptAt)} · `}
+                    {order.status === "pendiente_pago" ? "Revísalo y, si el dinero ya llegó, márcala «Pagado»." : "Ya revisado."}
+                  </p>
+                </div>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() =>
+                    adminService.openReceipt(order.id).catch((e) => toast.error(e instanceof ApiError ? e.message : "No se pudo abrir."))
+                  }
+                >
+                  <Paperclip /> Ver comprobante
+                </Button>
+              </section>
+            )}
+
             {order.status === "enviada" && (
               <p className="rounded-2xl bg-secondary p-4 text-sm">
                 Enviada por <strong>{order.carrier}</strong> · guía <strong>{order.tracking}</strong>
@@ -238,8 +264,15 @@ function OrderDetail({ order, onChanged }: { order: Order; onChanged: (o: Order)
                     </Field>
                   </div>
                 )}
-                {estado === "pagada" && order.paymentMethod === "whatsapp" && (
-                  <p className="text-xs text-muted-foreground">Márcala pagada solo cuando hayas recibido el pago.</p>
+                {estado === "pagada" && order.paymentMethod === "transferencia" && (
+                  <p className="text-xs text-muted-foreground">
+                    Márcala pagada solo cuando el dinero ya esté en tu cuenta{order.hasReceipt ? " (revisa el comprobante)" : ""}.
+                  </p>
+                )}
+                {estado === "pagada" && order.paymentMethod === "mercadopago" && (
+                  <p className="text-xs text-muted-foreground">
+                    Mercado Pago la marca pagada solo. Hazlo a mano únicamente si el cliente te pagó por otro medio.
+                  </p>
                 )}
                 <Field id="o-nota" label="Nota (opcional, queda en el historial)">
                   <Textarea id="o-nota" rows={2} className="rounded-xl" placeholder="Ej. Pago por transferencia recibido" value={nota} onChange={(e) => setNota(e.target.value)} />

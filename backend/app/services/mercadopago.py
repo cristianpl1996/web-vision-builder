@@ -6,7 +6,7 @@ se confirma por DOS caminos que terminan en `aplicar_pago` (idempotente):
   2. al volver a la tienda, `buscar_pagos_de_orden` (sirve aunque MP no alcance el webhook,
      p. ej. en localhost).
 En los dos casos el pago se LEE de la API de MP con el Access Token: nunca se confía en lo
-que diga el navegador ni el cuerpo del webhook. Además se exige monto y moneda exactos.
+que diga el navegador ni el cuerpo del webhook. Además se exige monto y moneda exactos (los de la orden: MXN o USD).
 """
 
 import hashlib
@@ -19,7 +19,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.config import settings
 from app.modelos import Orden, OrdenEvento, Pago
-from app.services import ordenes
+from app.services import avisos, ordenes
 
 log = logging.getLogger(__name__)
 API = "https://api.mercadopago.com"
@@ -41,12 +41,14 @@ async def crear_preferencia(access_token: str, orden: Orden) -> str:
             "title": lin.nombre,
             "quantity": lin.cantidad,
             "unit_price": lin.precio,
-            "currency_id": "MXN",
+            "currency_id": orden.moneda,
         }
         for lin in orden.lineas
     ]
     if orden.envio:
-        items.append({"id": "envio", "title": "Envío", "quantity": 1, "unit_price": orden.envio, "currency_id": "MXN"})
+        items.append(
+            {"id": "envio", "title": "Envío", "quantity": 1, "unit_price": orden.envio, "currency_id": orden.moneda}
+        )
     base = settings.app_url.rstrip("/")
     cuerpo = {
         "items": items,
@@ -135,13 +137,14 @@ async def aplicar_pago(db: AsyncSession, pago: dict) -> Orden | None:
     registro.monto = monto
     registro.datos = {k: pago.get(k) for k in ("status", "status_detail", "payment_method_id", "date_approved")}
 
-    paso_a_pagada = False
+    paso_a_pagada = no_coincide = False
     if estado_mp == "approved" and orden.estado == "pendiente_pago":
-        if pago.get("currency_id") == "MXN" and abs(monto - orden.total) < 0.01:
+        if pago.get("currency_id") == orden.moneda and abs(monto - orden.total) < 0.01:
             ordenes.cambiar_estado(orden, "pagada", por="mercadopago", nota=f"Pago {externo_id} aprobado")
             paso_a_pagada = True
         else:
-            # Monto o moneda distintos: NO se marca pagada; queda en el historial para revisar.
+            # Monto o moneda distintos: NO se marca pagada; queda en el historial y se avisa.
+            no_coincide = True
             orden.eventos.append(
                 OrdenEvento(
                     estado=orden.estado,
@@ -150,4 +153,6 @@ async def aplicar_pago(db: AsyncSession, pago: dict) -> Orden | None:
                 )
             )
     await db.commit()
+    if no_coincide:
+        await avisos.pago_no_coincide(orden, monto, str(pago.get("currency_id")))
     return orden if paso_a_pagada else None

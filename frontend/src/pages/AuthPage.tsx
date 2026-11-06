@@ -13,7 +13,7 @@ import { Field } from "@/components/forms/Field";
 import { PasswordInput } from "@/components/auth/PasswordInput";
 import { useAuth } from "@/context/AuthContext";
 import { useCart } from "@/context/CartContext";
-import { formatPrice } from "@/lib/format";
+import { useCurrency } from "@/context/CurrencyContext";
 import { useCatalog } from "@/context/CatalogContext";
 import { cn } from "@/lib/utils";
 
@@ -52,6 +52,7 @@ export default function AuthPage() {
   const { user, loading } = useAuth();
   const { count, subtotal } = useCart();
   const { pricesReady: PRICES_READY } = useCatalog();
+  const { format: formatPrice } = useCurrency();
 
   useEffect(() => {
     document.title = (mode === "login" ? "Iniciar sesión" : "Crear cuenta") + " · SINERGIA";

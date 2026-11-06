@@ -23,7 +23,8 @@ export interface User {
   firstName: string;
   lastName: string;
   phone?: string | null;
-  role: "cliente" | "superadmin";
+  /** admin: órdenes y productos · superadmin: además Ajustes. */
+  role: "cliente" | "admin" | "superadmin";
   emailVerified: boolean;
   createdAt: string;
   addresses: Address[];

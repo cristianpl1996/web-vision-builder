@@ -1,6 +1,7 @@
 """Contraseñas, JWT y las dependencias que protegen las rutas.
 
-Un solo dueño para «¿quién es y qué puede hacer?»: `usuario_actual` y `solo_superadmin`.
+Un solo dueño para «¿quién es y qué puede hacer?»: `usuario_actual`, `solo_panel` (admin o
+superadmin) y `solo_superadmin` (Ajustes).
 Ninguna ruta decide permisos a mano.
 """
 
@@ -92,10 +93,22 @@ async def usuario_actual(
 Actual = Annotated[Usuario, Depends(usuario_actual)]
 
 
-async def solo_superadmin(usuario: Actual) -> Usuario:
-    if usuario.rol != "superadmin":
+# cliente: compra · admin: órdenes y productos · superadmin: además Ajustes (credenciales, cobro, correo).
+ROLES = ("cliente", "admin", "superadmin")
+ROLES_PANEL = ("admin", "superadmin")
+
+
+async def solo_panel(usuario: Actual) -> Usuario:
+    if usuario.rol not in ROLES_PANEL:
         raise HTTPException(status.HTTP_403_FORBIDDEN, "No tienes permiso para esto.")
     return usuario
 
 
-Admin = Annotated[Usuario, Depends(solo_superadmin)]
+async def solo_superadmin(usuario: Actual) -> Usuario:
+    if usuario.rol != "superadmin":
+        raise HTTPException(status.HTTP_403_FORBIDDEN, "Solo el superadmin puede hacer esto.")
+    return usuario
+
+
+Admin = Annotated[Usuario, Depends(solo_panel)]
+Superadmin = Annotated[Usuario, Depends(solo_superadmin)]

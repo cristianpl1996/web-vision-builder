@@ -25,7 +25,9 @@ class Settings(BaseSettings):
     webhook_url_publica: str = ""
     # Orígenes del navegador que pueden llamar a la API.
     cors_origenes: list[str] = ["http://localhost:8080", "http://localhost:8081", "http://localhost:8090"]
-    media_dir: str = "/data/media"
+    media_dir: str = "/data/media"  # fotos de productos: públicas en /v1/media
+    # Comprobantes de pago: PRIVADOS (solo los entrega la API al dueño del pedido y al panel).
+    comprobantes_dir: str = "/data/comprobantes"
 
     # SMTP de respaldo (en desarrollo, Mailpit). Lo guardado en Admin › Ajustes manda sobre esto.
     smtp_host: str = ""

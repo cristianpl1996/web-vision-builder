@@ -8,11 +8,11 @@ import { QuantityStepper } from "@/components/cart/QuantityStepper";
 import { ProductCard } from "@/components/product/ProductCard";
 import { STORE } from "@/data/products";
 import { useCatalog } from "@/context/CatalogContext";
-import { formatPrice, formatPricePrecise, priceOrQuote } from "@/lib/format";
+import { useCurrency } from "@/context/CurrencyContext";
 import { useCart } from "@/context/CartContext";
 import { useAuth } from "@/context/AuthContext";
 import { cn } from "@/lib/utils";
-import { BENEFITS } from "@/components/SystemSection";
+import { BENEFITS } from "@/data/benefits";
 
 export default function ProductPage() {
   const { slug = "" } = useParams();
@@ -20,6 +20,7 @@ export default function ProductPage() {
   const product = getBySlug(slug);
   const navigate = useNavigate();
   const { add } = useCart();
+  const { price, convert, format, pricePrecise, priceOrQuote, currency } = useCurrency();
   const { user } = useAuth();
   const [qty, setQty] = useState(1);
 
@@ -104,10 +105,10 @@ export default function ProductPage() {
               </p>
             ) : (
               <div className="mt-6 flex items-end gap-3">
-                <span className="price text-4xl font-bold">{formatPrice(product.price)}</span>
+                <span className="price text-4xl font-bold">{price(product.price)}</span>
                 <span className="price pb-1.5 text-sm text-muted-foreground">
-                  {STORE.currency}
-                  {product.totalMg > 0 && ` · ${formatPricePrecise(product.price / product.totalMg)} por mg`}
+                  {currency === "MXN" && "MXN"}
+                  {product.totalMg > 0 && `${currency === "MXN" ? " · " : ""}${pricePrecise(convert(product.price) / product.totalMg)} por mg`}
                 </span>
               </div>
             )}
@@ -215,7 +216,7 @@ export default function ProductPage() {
         <div className="flex items-center gap-3">
           <div className="min-w-0 flex-1">
             <p className="truncate text-sm font-semibold">{product.name}</p>
-            <p className={product.price === null ? "text-sm font-semibold text-primary" : "price text-lg font-bold"}>{product.price === null ? priceOrQuote(null) : formatPrice(product.price * qty)}</p>
+            <p className={product.price === null ? "text-sm font-semibold text-primary" : "price text-lg font-bold"}>{product.price === null ? priceOrQuote(null) : format(convert(product.price) * qty)}</p>
           </div>
           {comprable ? (
             <Button size="lg" onClick={() => add(product.id, qty)}>

@@ -14,7 +14,7 @@ import { useCart } from "@/context/CartContext";
 import { authService } from "@/services/auth";
 import { orderService, type Order } from "@/services/orders";
 import { ApiError } from "@/lib/api";
-import { formatDate, formatPrice } from "@/lib/format";
+import { formatDate, formatMoney } from "@/lib/format";
 
 export default function AccountPage() {
   const { user, logout, isAdmin } = useAuth();
@@ -105,13 +105,24 @@ export default function AccountPage() {
                         {o.items.reduce((n, i) => n + i.quantity, 0)} artículos
                       </span>
                     </div>
+                    {o.status === "pendiente_pago" && (
+                      <p className="mt-3 text-sm text-amber-900">
+                        {o.hasReceipt ? (
+                          "Recibimos tu comprobante: lo estamos revisando."
+                        ) : (
+                          <Link to={`/pedido/${o.id}`} className="font-semibold underline-offset-4 hover:underline">
+                            {o.paymentMethod === "mercadopago" ? "Completa tu pago" : "Ver datos de pago y subir comprobante"} →
+                          </Link>
+                        )}
+                      </p>
+                    )}
                     {o.status === "enviada" && o.tracking && (
                       <p className="mt-3 text-sm text-muted-foreground">
                         {o.carrier} · guía <strong className="text-foreground">{o.tracking}</strong>
                       </p>
                     )}
                     <div className="mt-4 flex flex-wrap items-center justify-between gap-2 border-t pt-4">
-                      <span className="price text-lg font-bold">{formatPrice(o.total)}</span>
+                      <span className="price text-lg font-bold">{formatMoney(o.total, o.currency)}</span>
                       <div className="flex gap-2">
                         <Button size="sm" variant="ghost" asChild>
                           <Link to={`/pedido/${o.id}`}>Ver detalle</Link>

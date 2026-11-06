@@ -63,3 +63,20 @@ export async function api<T = unknown>(path: string, { method = "GET", body, for
   if (!res.ok) throw new ApiError(mensajeDeError(cuerpo, res.status), res.status);
   return cuerpo as T;
 }
+
+/** Archivo privado (p. ej. un comprobante): se baja con la sesión y se abre en otra pestaña. */
+export async function abrirArchivo(path: string): Promise<void> {
+  const token = getToken();
+  // La pestaña se abre ANTES del await: si no, el navegador la bloquea como ventana emergente.
+  const ventana = window.open("", "_blank");
+  try {
+    const res = await fetch(`/v1${path}`, { headers: token ? { Authorization: `Bearer ${token}` } : {} });
+    if (!res.ok) throw new ApiError(mensajeDeError(await res.json().catch(() => null), res.status), res.status);
+    const url = URL.createObjectURL(await res.blob());
+    if (ventana) ventana.location.href = url;
+    else window.location.assign(url);
+  } catch (e) {
+    ventana?.close();
+    throw e;
+  }
+}

@@ -1,11 +1,13 @@
 /**
  * Órdenes contra la API. El total lo calcula el servidor: aquí solo se mandan ids y cantidades.
  */
-import { api } from "@/lib/api";
+import { abrirArchivo, api } from "@/lib/api";
 import type { Address } from "@/services/auth";
+import type { Currency } from "@/lib/format";
 
 export type OrderStatus = "pendiente_pago" | "pagada" | "preparando" | "enviada" | "entregada" | "cancelada";
-export type PaymentMethod = "mercadopago" | "whatsapp";
+/** Pasarela (Mercado Pago) o transferencia/depósito con comprobante. */
+export type PaymentMethod = "mercadopago" | "transferencia";
 
 export interface OrderItem {
   productId: number | null;
@@ -31,12 +33,19 @@ export interface Order {
   subtotal: number;
   shipping: number;
   total: number;
+  /** Los montos de la orden están en esta moneda. */
+  currency: Currency;
+  /** Pesos por dólar usados (solo en dólares). */
+  exchangeRate: number | null;
   address: Address;
   paymentMethod: PaymentMethod;
   status: OrderStatus;
   carrier: string | null;
   tracking: string | null;
   paymentUrl: string | null;
+  /** Transferencia: el cliente ya subió su comprobante (el panel lo revisa y marca «pagada»). */
+  hasReceipt: boolean;
+  receiptAt: string | null;
   notes: string;
   events: OrderEvent[];
   createdAt: string;
@@ -46,6 +55,7 @@ export interface NewOrder {
   items: { productId: number; quantity: number }[];
   address: Address;
   paymentMethod: PaymentMethod;
+  currency: Currency;
   notes?: string;
 }
 
@@ -60,6 +70,12 @@ export const orderService = {
   get: (id: number | string) => api<Order>(`/ordenes/${id}`),
   retryPayment: (id: number) => api<Created>(`/ordenes/${id}/pago`, { method: "POST" }),
   verifyPayment: (id: number | string) => api<Order>(`/ordenes/${id}/verificar-pago`, { method: "POST" }),
+  uploadReceipt(id: number, file: File) {
+    const form = new FormData();
+    form.append("archivo", file);
+    return api<Order>(`/ordenes/${id}/comprobante`, { method: "POST", form });
+  },
+  openReceipt: (id: number) => abrirArchivo(`/ordenes/${id}/comprobante`),
 };
 
 export const ORDER_STATUS_LABEL: Record<OrderStatus, string> = {
@@ -93,5 +109,5 @@ export const NEXT_STATUSES: Record<OrderStatus, OrderStatus[]> = {
 
 export const PAYMENT_LABEL: Record<PaymentMethod, string> = {
   mercadopago: "Mercado Pago",
-  whatsapp: "Coordinado por WhatsApp",
+  transferencia: "Transferencia con comprobante",
 };

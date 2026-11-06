@@ -7,6 +7,7 @@ pueden leer. Al responder al panel, los secretos nunca salen: solo «configurado
 
 import base64
 import hashlib
+import math
 from functools import lru_cache
 
 from cryptography.fernet import Fernet, InvalidToken
@@ -29,6 +30,17 @@ DEFINICION: dict[str, tuple[bool, str]] = {
     "envio_costo": (False, "0"),
     "envio_gratis_desde": (False, ""),
     "correo_avisos": (False, ""),
+    # Formas de pago que ofrece la tienda («1» = encendida). Mercado Pago además necesita
+    # credenciales. Siempre queda al menos una (lo valida `formas_de_pago_validas`).
+    "pago_mercadopago": (False, "1"),
+    "pago_transferencia": (False, "1"),
+    # Lo que ve el cliente para pagar por transferencia (banco, titular, CLABE...). Vacío =
+    # «te enviamos los datos por WhatsApp».
+    "transferencia_datos": (False, ""),
+    # Pesos por dólar. Vacío = la tienda solo vende en pesos.
+    "tipo_cambio_usd": (False, ""),
+    # «1» = la cuenta de Mercado Pago acepta cobros en dólares (no todas las cuentas de México).
+    "mp_usd": (False, ""),
 }
 SECRETOS = frozenset(k for k, (secreto, _) in DEFINICION.items() if secreto)
 
@@ -87,3 +99,37 @@ def entero(valor: str, defecto: int | None = None) -> int | None:
         return int(str(valor).strip())
     except ValueError:
         return defecto
+
+
+def tipo_cambio(valor: str) -> float | None:
+    """Pesos por dólar, o None si no está configurado (o no es un número positivo)."""
+    try:
+        tc = float(str(valor).strip().replace(",", "."))
+    except ValueError:
+        return None
+    return tc if math.isfinite(tc) and 1 <= tc <= 1000 else None
+
+
+def formas_de_pago(a: dict[str, str]) -> dict[str, bool]:
+    """Qué puede usar el cliente HOY: un solo dueño para checkout, pedido y validaciones."""
+    mp = bool(a["mp_access_token"]) and a["pago_mercadopago"] == "1"
+    return {
+        "mercadopago": mp,
+        "mercadopago_usd": mp and a["mp_usd"] == "1",
+        "transferencia": a["pago_transferencia"] == "1",
+    }
+
+
+def con_cambios(a: dict[str, str], cambios: dict[str, str]) -> dict[str, str]:
+    """Cómo quedarían los ajustes tras guardar `cambios` (mismas reglas que `guardar`)."""
+    nuevo = dict(a)
+    for clave, valor in cambios.items():
+        if clave not in DEFINICION:
+            continue
+        valor = (valor or "").strip()
+        if clave in SECRETOS:
+            if not valor:
+                continue
+            valor = "" if valor == "__borrar__" else valor
+        nuevo[clave] = valor
+    return nuevo

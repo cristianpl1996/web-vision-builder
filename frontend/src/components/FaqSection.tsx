@@ -1,9 +1,11 @@
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { FAQS } from "@/data/content";
 import { useReveal } from "@/hooks/use-reveal";
+import { paymentPhrase, useStoreConfig } from "@/services/store";
 
 export function FaqSection() {
   const ref = useReveal<HTMLElement>();
+  const { data: config } = useStoreConfig();
   return (
     <section ref={ref} id="faq" className="section scroll-mt-20 bg-secondary/60" aria-labelledby="faq-title">
       <div className="container grid gap-10 lg:grid-cols-12">
@@ -18,7 +20,7 @@ export function FaqSection() {
           {FAQS.map((f, i) => (
             <AccordionItem key={f.q} value={`faq-${i}`} className="rounded-2xl border bg-card px-5 shadow-soft sm:px-6">
               <AccordionTrigger className="py-5 text-left text-base font-semibold hover:no-underline sm:text-lg">{f.q}</AccordionTrigger>
-              <AccordionContent className="pb-5 text-base leading-relaxed text-muted-foreground">{f.a}</AccordionContent>
+              <AccordionContent className="pb-5 text-base leading-relaxed text-muted-foreground">{f.a.replace("{formas_de_pago}", paymentPhrase(config))}</AccordionContent>
             </AccordionItem>
           ))}
         </Accordion>

@@ -4,7 +4,10 @@ import { authService, type ProfilePatch, type RegisterInput, type User } from "@
 interface AuthContextValue {
   user: User | null;
   loading: boolean;
+  /** Entra al panel (admin o superadmin). */
   isAdmin: boolean;
+  /** Además ve Ajustes (credenciales, cobro y correo). */
+  isSuperadmin: boolean;
   login: (email: string, password: string) => Promise<User>;
   register: (input: RegisterInput) => Promise<User>;
   logout: () => Promise<void>;
@@ -29,7 +32,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const value: AuthContextValue = {
     user,
     loading,
-    isAdmin: user?.role === "superadmin",
+    isAdmin: user?.role === "admin" || user?.role === "superadmin",
+    isSuperadmin: user?.role === "superadmin",
     setUser,
     login: async (email, password) => {
       const u = await authService.login(email, password);

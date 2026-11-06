@@ -1,14 +1,17 @@
 import { useEffect, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { CheckCircle2, Copy, CreditCard, Loader2, Mail, Send, Truck } from "lucide-react";
+import { CheckCircle2, Copy, CreditCard, DollarSign, Landmark, Loader2, Mail, Send, Truck, Wallet } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Field } from "@/components/forms/Field";
 import { PasswordInput } from "@/components/auth/PasswordInput";
 import { useAuth } from "@/context/AuthContext";
 import { adminService, type Settings } from "@/services/admin";
 import { ApiError } from "@/lib/api";
+import { convertirPesos, formatMoney, formatPrice } from "@/lib/format";
 
 /** Campos secretos: el servidor solo dice si están configurados; aquí se escriben, nunca se leen. */
 const SECRETOS = ["mp_access_token", "mp_webhook_secret", "smtp_password"] as const;
@@ -32,6 +35,11 @@ export function SettingsTab() {
   const set = (k: string, v: string) => setForm((f) => ({ ...f, [k]: v }));
   const configurado = (k: Secreto) => (q.data as Settings | undefined)?.[k] === true;
   const webhook = `${window.location.origin}/v1/pagos/webhook/mercadopago`;
+  const encendida = (k: "pago_mercadopago" | "pago_transferencia") => form[k] === "1";
+  const mpListo = configurado("mp_access_token") || !!form.mp_access_token;
+  // Ejemplo con la misma regla del servidor: dólares enteros, redondeados hacia arriba.
+  const tc = Number((form.tipo_cambio_usd ?? "").replace(",", "."));
+  const ejemploUsd = tc >= 1 && tc <= 1000 ? convertirPesos(1590, tc) : null;
 
   const guardar = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -110,8 +118,69 @@ export function SettingsTab() {
 
       <section className="space-y-4 rounded-3xl border bg-card p-6">
         <h2 className="flex items-center gap-2 font-sans text-lg font-bold">
+          <Wallet className="h-5 w-5 text-primary" /> Formas de pago
+        </h2>
+        <p className="text-sm text-muted-foreground">
+          Enciende las que quieras ofrecer; el checkout y la página del pedido muestran solo esas. Siempre debe quedar al
+          menos una.
+        </p>
+        <label htmlFor="a-pago_mercadopago" className="flex cursor-pointer items-start gap-3 rounded-2xl bg-secondary p-4 text-sm">
+          <Checkbox
+            id="a-pago_mercadopago"
+            className="mt-0.5"
+            checked={encendida("pago_mercadopago")}
+            onCheckedChange={(v) => set("pago_mercadopago", v === true ? "1" : "")}
+          />
+          <span>
+            <span className="flex items-center gap-1.5 font-semibold">
+              <CreditCard className="h-4 w-4 text-primary" /> Pago en línea con Mercado Pago (pasarela)
+            </span>
+            <span className="mt-1 block text-muted-foreground">
+              {mpListo
+                ? "Tarjeta, OXXO o SPEI. El pago se confirma solo y la orden pasa a «Pagado»."
+                : "Necesita las credenciales de abajo. Mientras no estén, no se muestra en la tienda."}
+            </span>
+          </span>
+        </label>
+        <label htmlFor="a-pago_transferencia" className="flex cursor-pointer items-start gap-3 rounded-2xl bg-secondary p-4 text-sm">
+          <Checkbox
+            id="a-pago_transferencia"
+            className="mt-0.5"
+            checked={encendida("pago_transferencia")}
+            onCheckedChange={(v) => set("pago_transferencia", v === true ? "1" : "")}
+          />
+          <span>
+            <span className="flex items-center gap-1.5 font-semibold">
+              <Landmark className="h-4 w-4 text-primary" /> Transferencia o depósito con comprobante
+            </span>
+            <span className="mt-1 block text-muted-foreground">
+              El cliente ve los datos de abajo, paga y sube su comprobante en su pedido. Te llega un correo y tú la marcas
+              «Pagado» al revisarlo.
+            </span>
+          </span>
+        </label>
+        <Field
+          id="a-transferencia_datos"
+          label="Datos para transferencia o depósito"
+          hint="Lo que verá el cliente. Si lo dejas vacío, le pedimos que te escriba por WhatsApp para dárselos."
+        >
+          <Textarea
+            id="a-transferencia_datos"
+            rows={4}
+            className="rounded-xl"
+            value={form.transferencia_datos ?? ""}
+            placeholder={"Banco: …\nTitular: …\nCLABE: …"}
+            onChange={(e) => set("transferencia_datos", e.target.value)}
+          />
+        </Field>
+      </section>
+
+      <section className="space-y-4 rounded-3xl border bg-card p-6">
+        <h2 className="flex items-center gap-2 font-sans text-lg font-bold">
           <CreditCard className="h-5 w-5 text-primary" /> Mercado Pago
-          {configurado("mp_access_token") ? (
+          {configurado("mp_access_token") && !encendida("pago_mercadopago") ? (
+            <span className="ml-auto rounded-full bg-muted px-3 py-1 text-xs font-semibold text-muted-foreground">Apagado</span>
+          ) : configurado("mp_access_token") ? (
             <span className="ml-auto inline-flex items-center gap-1 rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-900">
               <CheckCircle2 className="h-3.5 w-3.5" /> Activo
             </span>
@@ -159,6 +228,38 @@ export function SettingsTab() {
             <Input id="a-envio_gratis_desde" inputMode="numeric" value={form.envio_gratis_desde ?? ""} placeholder="Ej. 1500" onChange={(e) => set("envio_gratis_desde", e.target.value.replace(/\D/g, ""))} />
           </Field>
         </div>
+      </section>
+
+      <section className="space-y-4 rounded-3xl border bg-card p-6">
+        <h2 className="flex items-center gap-2 font-sans text-lg font-bold">
+          <DollarSign className="h-5 w-5 text-primary" /> Monedas
+          {ejemploUsd !== null ? (
+            <span className="ml-auto rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-900">MXN y USD</span>
+          ) : (
+            <span className="ml-auto rounded-full bg-muted px-3 py-1 text-xs font-semibold text-muted-foreground">Solo MXN</span>
+          )}
+        </h2>
+        <p className="text-sm text-muted-foreground">
+          Los precios se capturan en pesos. Con un tipo de cambio, el cliente puede elegir ver y pagar en dólares: cada
+          precio se convierte y se redondea al dólar de arriba. Cada pedido guarda la moneda y el tipo de cambio con que se hizo.
+        </p>
+        <Field
+          id="a-tipo_cambio_usd"
+          label="Tipo de cambio (pesos por dólar)"
+          hint={ejemploUsd !== null ? `Ej.: un producto de ${formatPrice(1590)} se verá en ${formatMoney(ejemploUsd, "USD")}.` : "Vacío = la tienda solo vende en pesos."}
+        >
+          <Input id="a-tipo_cambio_usd" inputMode="decimal" value={form.tipo_cambio_usd ?? ""} placeholder="Ej. 18.50" onChange={(e) => set("tipo_cambio_usd", e.target.value.replace(/[^\d.,]/g, ""))} />
+        </Field>
+        <label htmlFor="a-mp_usd" className="flex cursor-pointer items-start gap-3 rounded-2xl bg-secondary p-4 text-sm">
+          <Checkbox id="a-mp_usd" className="mt-0.5" checked={form.mp_usd === "1"} onCheckedChange={(v) => set("mp_usd", v === true ? "1" : "")} />
+          <span>
+            <span className="font-semibold">Mi cuenta de Mercado Pago acepta cobros en dólares</span>
+            <span className="mt-1 block text-muted-foreground">
+              Las cuentas de México cobran en pesos. Actívalo solo si Mercado Pago te habilitó dólares y lo comprobaste con
+              una compra de prueba. Si no, los pedidos en dólares se pagan por transferencia.
+            </span>
+          </span>
+        </label>
       </section>
 
       <section className="space-y-4 rounded-3xl border bg-card p-6">

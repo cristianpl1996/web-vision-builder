@@ -4,11 +4,12 @@ import { ShoppingBag, User, ChevronRight, LogOut, Package, LayoutDashboard } fro
 import { Sheet, SheetContent, SheetDescription, SheetTitle } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { Logo } from "@/components/layout/Logo";
+import { CurrencySwitch } from "@/components/layout/CurrencySwitch";
 import { useCart } from "@/context/CartContext";
 import { useAuth } from "@/context/AuthContext";
 import { cn } from "@/lib/utils";
 
-export const NAV_ITEMS = [
+const NAV_ITEMS = [
   { label: "Beneficios", hash: "beneficios" },
   { label: "Fórmula", hash: "formula" },
   { label: "Tienda", hash: "productos" },
@@ -100,6 +101,7 @@ export function Header() {
         </nav>
 
         <div className="flex items-center gap-1 -mr-2.5 -translate-y-2 lg:translate-y-0">
+          <CurrencySwitch light={transparent} className="mr-1 hidden sm:inline-flex" />
           {isAdmin && (
             <Link to="/admin" className={cn(iconBtn, "hidden sm:grid")} aria-label="Panel de administración" title="Panel de administración">
               <LayoutDashboard className="h-[22px] w-[22px]" />
@@ -160,6 +162,7 @@ export function Header() {
             </ul>
           </nav>
           <div className="space-y-2 border-t p-5 pb-safe">
+            <CurrencySwitch className="mb-2 flex w-full [&>button]:flex-1" />
             {user ? (
               <>
                 <p className="px-1 pb-1 text-sm text-muted-foreground">

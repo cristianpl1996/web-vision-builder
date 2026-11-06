@@ -171,7 +171,7 @@ class OrdenFotos(BaseModel):
 
 # ── Órdenes ─────────────────────────────────────────────────────────────────
 
-MetodoPago = Literal["mercadopago", "whatsapp"]
+MetodoPago = Literal["mercadopago", "transferencia"]
 
 
 class ItemIn(BaseModel):
@@ -183,6 +183,7 @@ class OrdenIn(BaseModel):
     items: list[ItemIn] = Field(min_length=1, max_length=30)
     address: Direccion
     paymentMethod: MetodoPago
+    currency: Literal["MXN", "USD"] = "MXN"
     notes: str = Field(default="", max_length=500)
 
 
@@ -211,12 +212,16 @@ class OrdenOut(BaseModel):
     subtotal: int
     shipping: int
     total: int
+    currency: str
+    exchangeRate: float | None
     address: Direccion
     paymentMethod: str
     status: str
     carrier: str | None
     tracking: str | None
     paymentUrl: str | None
+    hasReceipt: bool
+    receiptAt: datetime | None
     notes: str
     events: list[EventoOut]
     createdAt: datetime
@@ -241,12 +246,16 @@ class OrdenOut(BaseModel):
             subtotal=o.subtotal,
             shipping=o.envio,
             total=o.total,
+            currency=o.moneda,
+            exchangeRate=o.tipo_cambio,
             address=o.direccion,
             paymentMethod=o.metodo_pago,
             status=o.estado,
             carrier=o.transportista,
             tracking=o.guia,
             paymentUrl=o.pago_url if o.estado == "pendiente_pago" else None,
+            hasReceipt=bool(o.comprobante),
+            receiptAt=o.comprobante_en,
             notes=o.notas,
             events=[EventoOut(estado=e.estado, nota=e.nota, por=e.por, fecha=e.creado_en) for e in o.eventos],
             createdAt=o.creado_en,
@@ -273,6 +282,12 @@ class PaginaOrdenes(BaseModel):
 
 class TiendaConfig(BaseModel):
     mercadopago: bool
+    transferencia: bool = True
+    # Datos para pagar por transferencia que se le muestran al cliente (texto libre de Ajustes).
+    transferInfo: str = ""
     shippingCost: int
     freeShippingFrom: int | None
+    # Pesos por dólar; None = solo se vende en pesos. Precios y envío llegan en pesos.
+    usdRate: float | None = None
+    mercadopagoUsd: bool = False
     appUrl: str = settings.app_url

@@ -15,8 +15,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends curl \
 COPY --from=builder /opt/venv /opt/venv
 ENV PATH=/opt/venv/bin:$PATH
 COPY . .
-# Usuario no-root; /data/media es donde se guardarán las fotos de productos (volumen).
-RUN useradd -m appuser && mkdir -p /data/media && chown -R appuser /app /data/media \
+# Usuario no-root; volúmenes: /data/media (fotos, públicas) y /data/comprobantes (privados).
+RUN useradd -m appuser && mkdir -p /data/media /data/comprobantes \
+    && chown -R appuser /app /data/media /data/comprobantes \
     && chmod +x docker-entrypoint.sh
 USER appuser
 EXPOSE 8000

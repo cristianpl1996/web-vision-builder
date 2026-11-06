@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import petsImage from "@/assets/pets-hero.webp";
 import petsImageSm from "@/assets/pets-hero-sm.webp";
 import { useCatalog } from "@/context/CatalogContext";
-import { formatPrice, priceOrQuote } from "@/lib/format";
+import { useCurrency } from "@/context/CurrencyContext";
 import { useCart } from "@/context/CartContext";
 import { cn } from "@/lib/utils";
 
@@ -36,6 +36,7 @@ function useRotating(length: number, ms = 4200) {
 
 const Hero = () => {
   const { add } = useCart();
+  const { price, priceOrQuote } = useCurrency();
   const scrollTo = (id: string) => document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
   // El carrusel muestra lo que se puede comprar, empezando por el destacado.
   const { products } = useCatalog();
@@ -91,7 +92,7 @@ const Hero = () => {
 
           <div className="mt-8 flex animate-fade-up flex-col gap-3 [animation-delay:240ms] sm:flex-row">
             <Button size="xl" variant="light" onClick={() => scrollTo("productos")} className="w-full sm:w-auto">
-              {fromPrice === null ? "Ver presentaciones" : `Comprar desde ${formatPrice(fromPrice)}`} <ArrowRight />
+              {fromPrice === null ? "Ver presentaciones" : `Comprar desde ${price(fromPrice)}`} <ArrowRight />
             </Button>
             <Button size="xl" variant="glass" onClick={() => scrollTo("beneficios")} className="w-full sm:w-auto">
               Conoce los beneficios

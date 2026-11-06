@@ -1,5 +1,5 @@
-/** Lo que usa el panel del superadmin. Todo lo valida el backend (`/v1/admin/*`). */
-import { api } from "@/lib/api";
+/** Lo que usa el panel de administración (admin y superadmin). Todo lo valida el backend (`/v1/admin/*`). */
+import { abrirArchivo, api } from "@/lib/api";
 import type { ApiProduct } from "@/data/products";
 import type { Order, OrderStatus } from "@/services/orders";
 
@@ -44,6 +44,7 @@ export const adminService = {
   deletePhoto: (id: number, fotoId: number) =>
     api<ApiProduct>(`/admin/productos/${id}/fotos/${fotoId}`, { method: "DELETE" }),
 
+  openReceipt: (id: number) => abrirArchivo(`/admin/ordenes/${id}/comprobante`),
   settings: () => api<Settings>("/admin/ajustes"),
   saveSettings: (s: Record<string, string>) => api<Settings>("/admin/ajustes", { method: "PUT", body: s }),
   testEmail: (email: string) =>

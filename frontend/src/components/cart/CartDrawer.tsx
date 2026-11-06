@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { useCart } from "@/context/CartContext";
 import { useAuth } from "@/context/AuthContext";
 import { useCatalog } from "@/context/CatalogContext";
-import { formatPrice, priceOrQuote } from "@/lib/format";
+import { useCurrency } from "@/context/CurrencyContext";
 import { QuantityStepper } from "./QuantityStepper";
 
 export function CartDrawer() {
@@ -14,6 +14,7 @@ export function CartDrawer() {
   const navigate = useNavigate();
 
   const { products, pricesReady: PRICES_READY } = useCatalog();
+  const { format: formatPrice, priceOrQuote } = useCurrency();
   const upsell = products.filter((p) => !p.soldOut && !lines.some((l) => l.productId === p.id)).slice(0, 2);
 
   const checkout = () => {

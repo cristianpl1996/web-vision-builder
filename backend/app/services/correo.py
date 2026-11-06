@@ -122,21 +122,22 @@ def plantilla(titulo: str, cuerpo: str, boton: tuple[str, str] | None = None) ->
 </div></body></html>"""
 
 
-def pesos(valor: int) -> str:
-    return f"${valor:,.0f} MXN"
+def dinero(valor: int, moneda: str = "MXN") -> str:
+    return f"${valor:,.0f} {moneda}"
 
 
 def resumen_orden(orden) -> str:
     filas = "".join(
         f'<tr><td style="padding:6px 0">{escape(lin.nombre)} × {lin.cantidad}</td>'
-        f'<td style="padding:6px 0;text-align:right">{pesos(lin.precio * lin.cantidad)}</td></tr>'
+        f'<td style="padding:6px 0;text-align:right">{dinero(lin.precio * lin.cantidad, orden.moneda)}</td></tr>'
         for lin in orden.lineas
     )
-    envio = "Gratis" if orden.envio == 0 else pesos(orden.envio)
+    envio = "Gratis" if orden.envio == 0 else dinero(orden.envio, orden.moneda)
+    total = dinero(orden.total, orden.moneda)
     return (
         f'<table style="width:100%;border-collapse:collapse;font-size:14px">{filas}'
         f'<tr><td style="padding:6px 0;color:#6b7b72">Envío</td><td style="text-align:right">{envio}</td></tr>'
         f'<tr><td style="padding:10px 0;font-weight:bold;border-top:1px solid #e6e1d6">Total</td>'
-        f'<td style="text-align:right;font-weight:bold;border-top:1px solid #e6e1d6">{pesos(orden.total)}</td></tr>'
+        f'<td style="text-align:right;font-weight:bold;border-top:1px solid #e6e1d6">{total}</td></tr>'
         "</table>"
     )

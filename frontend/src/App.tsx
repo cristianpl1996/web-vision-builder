@@ -7,6 +7,7 @@ import { Loader2 } from "lucide-react";
 import { CartProvider } from "@/context/CartContext";
 import { AuthProvider } from "@/context/AuthContext";
 import { CatalogProvider } from "@/context/CatalogContext";
+import { CurrencyProvider } from "@/context/CurrencyContext";
 import { RequireAuth } from "@/components/auth/RequireAuth";
 import Index from "./pages/Index";
 
@@ -37,6 +38,7 @@ const App = () => (
   <QueryClientProvider client={queryClient}>
     <AuthProvider>
       <CatalogProvider>
+      <CurrencyProvider>
       <CartProvider>
         <TooltipProvider>
           <Sonner theme="light" position="top-center" richColors closeButton duration={3500} />
@@ -87,6 +89,7 @@ const App = () => (
           </Router>
         </TooltipProvider>
       </CartProvider>
+      </CurrencyProvider>
       </CatalogProvider>
     </AuthProvider>
   </QueryClientProvider>

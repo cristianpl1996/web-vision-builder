@@ -1,15 +1,15 @@
 # CLAUDE.md — SINERGIA
 
 Tienda en línea de SINERGIA by BOTICAN (CBD + CBG + terpenos, uso veterinario para
-perros y gatos), vendida en México en MXN. Landing + catálogo + carrito + cuentas +
-checkout + órdenes, y un panel de superadmin para órdenes y productos. Toda la UI va
+perros y gatos), vendida en México en pesos (MXN) y, con tipo de cambio, en dólares (USD). Landing + catálogo + carrito + cuentas +
+checkout + órdenes (en pesos MXN o dólares USD), y un panel de administración para órdenes y productos. Toda la UI va
 en español de México y en lenguaje de cliente, nunca en términos técnicos.
 
 ## Arquitectura
 `frontend/` (React + Vite + Tailwind + shadcn/ui) → Caddy sirve el estático y manda
 `/v1/*` al `backend/` (FastAPI + SQLAlchemy async + Alembic) → Postgres.
 Todo corre con `docker compose`. API bajo `/v1`, salud en `/health`, documentación
-en `/v1/docs`. Auth = JWT (cliente y superadmin son la misma tabla con un rol).
+en `/v1/docs`. Auth = JWT (cliente, admin y superadmin son la misma tabla con un rol).
 
 Las pantallas nunca llaman a `fetch`: usan `frontend/src/services/*` (auth, orders,
 store, admin) sobre `lib/api.ts`. El catálogo llega de `/v1/productos` por
@@ -23,10 +23,22 @@ store, admin) sobre `lib/api.ts`. El catálogo llega de `/v1/productos` por
   `ordenes` (precio, envío, estados y transiciones), `mercadopago` (preferencia, firma,
   `aplicar_pago` idempotente), `ajustes` (configuración y secretos cifrados con Fernet),
   `correo` (SMTP) y `avisos` (qué correo sale en cada momento).
-- `app/seguridad.py` — contraseñas (bcrypt), JWT y las dependencias `Actual` / `Admin`.
-  Toda ruta de admin recibe `_: Admin`; ninguna decide permisos a mano.
+- `app/seguridad.py` — contraseñas (bcrypt), JWT y las dependencias `Actual` / `Admin` / `Superadmin`.
+  Toda ruta de admin recibe `_: Admin` (o `_: Superadmin` en Ajustes); ninguna decide permisos a mano.
 - `app/modelos.py` (tablas), `app/schemas.py` (entrada/salida), `migrations/` (Alembic),
   `app/semilla/` (catálogo inicial, solo si la tabla está vacía).
+
+## Formas de pago
+Dos, y se encienden o apagan en **Admin › Ajustes › Formas de pago** (el servidor exige que
+quede al menos una; checkout, pedido, landing y pie muestran solo las activas):
+- **Mercado Pago** (pasarela): el pago se confirma solo (abajo).
+- **Transferencia o depósito con comprobante** (`metodo_pago = "transferencia"`): el pedido
+  muestra los «Datos para transferencia» de Ajustes, el cliente sube su comprobante (foto o PDF,
+  validado por contenido) en `/pedido/{id}`, al panel le llega un correo y el admin lo revisa y
+  marca «Pagada». Los comprobantes son PRIVADOS: viven en `COMPROBANTES_DIR` (volumen propio,
+  fuera de `/v1/media`) y solo los entrega la API al dueño del pedido y al panel.
+- Un pedido pendiente puede cambiar de una a otra (reintentar con MP, o subir comprobante).
+WhatsApp queda como canal de ayuda, no como forma de pago.
 
 ## Mercado Pago
 Checkout Pro. Las credenciales se cargan en **Admin › Ajustes** (cifradas): Access Token,
@@ -36,8 +48,23 @@ consultando la API de MP (`/ordenes/{id}/verificar-pago`). En los dos casos el p
 de la API de MP y se exige monto y moneda exactos. En producción hay que poner
 `WEBHOOK_URL_PUBLICA` (https) y registrar esa URL en el panel de Mercado Pago.
 
-## Superadmin
-No se crea desde la web: `docker compose exec backend python -m app.crear_superadmin <correo> <contraseña>`.
+## Roles y semilla
+- `cliente` compra · `admin` maneja órdenes y productos · `superadmin` además Ajustes
+  (credenciales de Mercado Pago, SMTP, envío y monedas). En el backend: `Admin` admite admin y
+  superadmin; `Superadmin` solo superadmin (rutas de Ajustes).
+- Ninguna cuenta del panel se crea desde la web.
+  `docker compose exec backend python -m app.sembrar` deja los 3 usuarios de prueba
+  (`superadmin@`, `admin@` y `cliente@sinergia.local`, contraseña `Sinergia2026`), el catálogo con fotos y
+  precios (solo si está vacío) y ajustes de ejemplo (solo los vacíos). Se puede correr las veces que
+  sea. En producción exige `--password` y no toca los ajustes (ahí no hay valores de ejemplo). Para un superadmin suelto: `python -m app.crear_superadmin`.
+
+## Monedas
+Los productos tienen su precio en pesos. Con «Tipo de cambio» en Admin › Ajustes, el cliente
+elige MXN o USD (selector en la barra y en el checkout). El servidor convierte con
+`services/ordenes.convertir` (dólares enteros, hacia arriba); el envío gratis se decide en pesos.
+Cada orden guarda `moneda` y `tipo_cambio`. Mercado Pago cobra en la moneda de la orden; en USD
+solo si se marca «Mi cuenta acepta dólares» (las cuentas de México cobran en pesos): si no,
+los pedidos en dólares se pagan por transferencia.
 
 ## Guía por zona
 - `docs/superpowers/specs/` — los diseños aprobados (qué y por qué) antes de código.
@@ -75,10 +102,11 @@ primero— así que manda esto:
   desde los ids de producto y las cantidades. Nada que llegue del navegador cuenta
   como precio.
 - **El pago lo confirma la pasarela** por webhook firmado e idempotente, nunca la
-  página de regreso del navegador.
+  página de regreso del navegador. Una transferencia la confirma una persona del panel
+  al revisar el comprobante: subir un comprobante NO marca la orden como pagada.
 - **La orden guarda su copia** del nombre y el precio de cada producto al comprar:
   cambiar o borrar un producto no altera órdenes viejas.
-- **Cada cliente ve solo lo suyo**; lo de administración exige superadmin EN EL
+- **Cada cliente ve solo lo suyo**; lo de administración exige admin o superadmin EN EL
   BACKEND (esconder un botón no es control).
 - **Nada inventado en el contenido.** Textos, beneficios, certificaciones y datos
   del producto salen de BOTICAN (landing anterior o lo que el doctor envía). Los
@@ -96,7 +124,9 @@ docker compose --profile dev up -d --build   # + Vite con recarga (5174) y Mailp
   (Postgres en `localhost:5433`). Los tests usan su propia base, `sinergia_test`, que
   crean y vacían solos; Mercado Pago y el correo se simulan.
   Lint: `uvx ruff@0.16.7 check . && uvx ruff@0.16.7 format --check .`
-- Frontend: `cd frontend && npx tsc -p tsconfig.app.json --noEmit && npm run build`.
+- Frontend: `cd frontend && npm test && npx tsc -p tsconfig.app.json --noEmit && npm run build`.
+  `npm test` (Vitest) fija que lo que la tienda muestra (conversión a dólares, envío, formas de
+  pago) coincide con las reglas del backend: si cambias una, cambia las dos y sus pruebas.
 - Migraciones: `cd backend && .venv/Scripts/alembic revision --autogenerate -m "..."`;
   el contenedor aplica `alembic upgrade head` al arrancar.
 

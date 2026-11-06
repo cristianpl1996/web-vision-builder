@@ -1,6 +1,6 @@
 import { Check } from "lucide-react";
 import { ORDER_STATUS_LABEL, ORDER_STATUS_TONE, type Order, type OrderStatus } from "@/services/orders";
-import { formatDate, formatPrice } from "@/lib/format";
+import { formatDate, formatMoney, formatMoneyPrecise } from "@/lib/format";
 import { cn } from "@/lib/utils";
 
 export function StatusBadge({ status, className }: { status: OrderStatus; className?: string }) {
@@ -47,23 +47,28 @@ export function OrderTotals({ order }: { order: Order }) {
             <span className="min-w-0 flex-1 font-medium">
               {i.name} <span className="text-muted-foreground">× {i.quantity}</span>
             </span>
-            <span className="price font-semibold">{formatPrice(i.price * i.quantity)}</span>
+            <span className="price font-semibold">{formatMoney(i.price * i.quantity, order.currency)}</span>
           </li>
         ))}
       </ul>
       <dl className="space-y-2 border-t pt-4 text-sm">
         <div className="flex justify-between">
           <dt className="text-muted-foreground">Subtotal</dt>
-          <dd className="price">{formatPrice(order.subtotal)}</dd>
+          <dd className="price">{formatMoney(order.subtotal, order.currency)}</dd>
         </div>
         <div className="flex justify-between">
           <dt className="text-muted-foreground">Envío</dt>
-          <dd className="price">{order.shipping === 0 ? "Sin costo" : formatPrice(order.shipping)}</dd>
+          <dd className="price">{order.shipping === 0 ? "Sin costo" : formatMoney(order.shipping, order.currency)}</dd>
         </div>
         <div className="flex justify-between pt-2 text-base">
           <dt className="font-semibold">Total</dt>
-          <dd className="price text-xl font-bold">{formatPrice(order.total)}</dd>
+          <dd className="price text-xl font-bold">{formatMoney(order.total, order.currency)}</dd>
         </div>
+        {order.currency === "USD" && order.exchangeRate && (
+          <p className="text-right text-xs text-muted-foreground">
+            Pedido en dólares · tipo de cambio {formatMoneyPrecise(order.exchangeRate)} por dólar
+          </p>
+        )}
       </dl>
     </>
   );

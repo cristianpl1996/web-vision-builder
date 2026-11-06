@@ -15,14 +15,14 @@ exhaustivo, pero no infles: un «alta» que no lo es enseña a ignorar al juez.
    - Ninguna llamada a la pasarela ni ningún envío de correo dentro de una transacción
      de base de datos que todavía puede deshacerse.
 2. **Lo que se rompe sin que los tests se enteren.** Sigue cada cambio hasta todas
-   sus puertas: la tienda pública, la cuenta del cliente y el panel del superadmin
+   sus puertas: la tienda pública, la cuenta del cliente y el panel (admin y superadmin)
    leen los MISMOS services. Un cambio de forma en el JSON rompe al frontend
    (`frontend/src/services/*`).
 3. **Fugas.**
    - **Entre clientes**, la más grave: toda consulta de órdenes, direcciones o
      datos de cuenta filtra por el usuario de la sesión; un id que llega del cliente
      se valida contra ese usuario.
-   - **De rol**: lo de administración exige superadmin en el BACKEND. Un endpoint
+   - **De rol**: lo de administración exige admin o superadmin (y Ajustes solo superadmin) en el BACKEND. Un endpoint
      nuevo sin guarda es un permiso abierto; esconder el botón no es control.
 4. **Seguridad.** Entrada sin validar, SQL armado con strings, contraseñas sin hash,
    secretos en el código o en los logs, datos personales (dirección, teléfono) en

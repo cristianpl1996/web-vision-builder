@@ -3,7 +3,7 @@ import { Link, Navigate, useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { ChevronDown, Loader2, Lock, ShieldCheck, Truck, CreditCard, MessageCircle, Check, ArrowLeft } from "lucide-react";
+import { ChevronDown, Loader2, Lock, ShieldCheck, Truck, CreditCard, Landmark, Check, ArrowLeft } from "lucide-react";
 import { toast } from "sonner";
 import { SiteLayout } from "@/components/layout/SiteLayout";
 import { Button } from "@/components/ui/button";
@@ -15,9 +15,11 @@ import { useCart } from "@/context/CartContext";
 import { useAuth } from "@/context/AuthContext";
 import { STORE } from "@/data/products";
 import { MX_STATES } from "@/data/content";
-import { formatPrice } from "@/lib/format";
+import { useCurrency } from "@/context/CurrencyContext";
+import { formatMoney } from "@/lib/format";
+import { CurrencySwitch } from "@/components/layout/CurrencySwitch";
 import { orderService, type PaymentMethod } from "@/services/orders";
-import { shippingFor, useStoreConfig } from "@/services/store";
+import { paymentOptions, shippingFor, useStoreConfig } from "@/services/store";
 import { ApiError } from "@/lib/api";
 import type { Address } from "@/services/auth";
 import { cn } from "@/lib/utils";
@@ -39,29 +41,42 @@ const schema = z.object({
 type Values = z.infer<typeof schema>;
 
 export default function CheckoutPage() {
-  const { lines, subtotal, count, clear } = useCart();
+  const { lines, subtotal, subtotalPesos, count, clear } = useCart();
+  const { currency, convert, format: formatPrice, usdEnabled } = useCurrency();
   const { user, updateProfile } = useAuth();
   const navigate = useNavigate();
   const { data: config, isLoading: configLoading } = useStoreConfig();
   const [paymentId, setPaymentId] = useState<PaymentMethod | null>(null);
-  // Con Mercado Pago activo se propone tarjeta; si no, WhatsApp.
-  const metodo: PaymentMethod = paymentId ?? (config?.mercadopago ? "mercadopago" : "whatsapp");
+  // Formas de pago que se encienden en Admin › Ajustes. Mercado Pago cobra en pesos; en dólares
+  // solo si la cuenta lo acepta. Con las dos disponibles se propone Mercado Pago.
+  const disponibles = paymentOptions(config, currency);
+  const elegible = (m: PaymentMethod | null): m is PaymentMethod => !!m && disponibles[m];
+  const metodo: PaymentMethod = elegible(paymentId)
+    ? paymentId
+    : disponibles.mercadopago
+      ? "mercadopago"
+      : "transferencia";
   const PAYMENT_METHODS = [
-    {
+    config?.mercadopago && {
       id: "mercadopago" as const,
-      label: "Tarjeta, OXXO o transferencia (Mercado Pago)",
-      description: config?.mercadopago
-        ? "Pagas en el sitio seguro de Mercado Pago y vuelves aquí."
-        : "Disponible muy pronto.",
-      enabled: !!config?.mercadopago,
+      icon: CreditCard,
+      // OXXO y transferencia SPEI de Mercado Pago solo existen en pesos.
+      label: currency === "USD" ? "Tarjeta con Mercado Pago" : "Tarjeta, OXXO o SPEI con Mercado Pago",
+      description: disponibles.mercadopago
+        ? "Pagas en el sitio seguro de Mercado Pago y el pago se confirma solo."
+        : "En dólares no está disponible: cambia a pesos (MXN) para pagar con Mercado Pago.",
+      enabled: disponibles.mercadopago,
     },
-    {
-      id: "whatsapp" as const,
-      label: "Coordinar el pago por WhatsApp",
-      description: "Te enviamos los datos de pago por WhatsApp al recibir tu pedido.",
+    config?.transferencia && {
+      id: "transferencia" as const,
+      icon: Landmark,
+      label: "Transferencia o depósito",
+      description: config.transferInfo
+        ? "Al confirmar te mostramos los datos para pagar y ahí mismo subes tu comprobante."
+        : "Al confirmar te compartimos los datos para pagar y subes tu comprobante en tu pedido.",
       enabled: true,
     },
-  ];
+  ].filter((m): m is Exclude<typeof m, false | undefined> => !!m);
   const [summaryOpen, setSummaryOpen] = useState(false);
   const [placing, setPlacing] = useState(false);
 
@@ -91,7 +106,7 @@ export default function CheckoutPage() {
   }, []);
 
   // Mismo cálculo que el servidor, solo para mostrar: el total que vale es el que devuelve la API.
-  const shipping = shippingFor(config, subtotal);
+  const shipping = convert(shippingFor(config, subtotalPesos));
   const total = subtotal + shipping;
 
   if (!placing && lines.length === 0) return <Navigate to="/" replace />;
@@ -109,6 +124,7 @@ export default function CheckoutPage() {
         items: lines.map((l) => ({ productId: Number(l.productId), quantity: l.quantity })),
         address,
         paymentMethod: metodo,
+        currency,
         notes: notes || undefined,
       });
       clear();
@@ -167,7 +183,7 @@ export default function CheckoutPage() {
         <div className="flex items-baseline justify-between border-t pt-3 text-base">
           <dt className="font-semibold">Total</dt>
           <dd className="price text-2xl font-bold">
-            <span className="mr-1 text-xs font-medium text-muted-foreground">{STORE.currency}</span>
+            {currency === "MXN" && <span className="mr-1 text-xs font-medium text-muted-foreground">MXN</span>}
             {formatPrice(total)}
           </dd>
         </div>
@@ -287,7 +303,7 @@ export default function CheckoutPage() {
               <p className="text-sm text-muted-foreground">
                 {shipping === 0 ? "Envío sin costo" : `Envío a domicilio: ${formatPrice(shipping)}`}
                 {config?.freeShippingFrom != null && shipping > 0 &&
-                  ` · gratis en compras desde ${formatPrice(config.freeShippingFrom)}`}
+                  ` · gratis en compras desde ${currency === "MXN" ? formatPrice(config.freeShippingFrom) : `${formatMoney(config.freeShippingFrom)} MXN`}`}
                 . Te avisamos por correo cuando tu pedido salga, con la paquetería y el número de guía.
               </p>
             </div>
@@ -299,6 +315,17 @@ export default function CheckoutPage() {
               <StepBadge n={4} />
               <h2 id="step-payment" className="font-sans text-xl font-bold">Pago</h2>
             </div>
+            {usdEnabled && (
+              <div className="mb-4 flex flex-wrap items-center justify-between gap-3 rounded-2xl border bg-card p-4">
+                <p className="text-sm">
+                  <span className="font-semibold">Moneda de pago</span>
+                  <span className="block text-muted-foreground">
+                    {currency === "USD" ? "Pagas en dólares estadounidenses." : "Pagas en pesos mexicanos."}
+                  </span>
+                </p>
+                <CurrencySwitch />
+              </div>
+            )}
             <div role="radiogroup" aria-labelledby="step-payment" className="space-y-3">
               {PAYMENT_METHODS.map((m) => (
                 <OptionCard
@@ -306,12 +333,10 @@ export default function CheckoutPage() {
                   selected={metodo === m.id}
                   disabled={!m.enabled}
                   onSelect={() => setPaymentId(m.id)}
-                  icon={m.id === "mercadopago" ? CreditCard : MessageCircle}
+                  icon={m.icon}
                   title={m.label}
                   text={m.description}
-                >
-                  {!m.enabled && <span className="rounded-full bg-secondary px-2 py-1 text-[11px] font-semibold text-muted-foreground sm:px-2.5 sm:text-xs">Pronto</span>}
-                </OptionCard>
+                />
               ))}
             </div>
           </section>

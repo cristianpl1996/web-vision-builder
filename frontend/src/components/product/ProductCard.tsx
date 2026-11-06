@@ -3,12 +3,13 @@ import { ShoppingBag, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useCart } from "@/context/CartContext";
 import { type Product } from "@/data/products";
-import { formatPrice, formatPricePrecise } from "@/lib/format";
+import { useCurrency } from "@/context/CurrencyContext";
 import { MessageCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export function ProductCard({ product, className }: { product: Product; className?: string }) {
   const { add, lines } = useCart();
+  const { price, convert, pricePrecise } = useCurrency();
   const inCart = lines.find((l) => l.productId === product.id)?.quantity ?? 0;
 
   return (
@@ -68,7 +69,7 @@ export function ProductCard({ product, className }: { product: Product; classNam
         <div className="mt-auto flex items-end justify-between gap-3 pt-5">
           <div>
             {product.compareAtPrice && (
-              <span className="price block text-sm text-muted-foreground line-through">{formatPrice(product.compareAtPrice)}</span>
+              <span className="price block text-sm text-muted-foreground line-through">{price(product.compareAtPrice)}</span>
             )}
             {product.price === null ? (
               <span className="inline-flex items-center gap-1.5 text-sm font-semibold text-primary">
@@ -76,9 +77,9 @@ export function ProductCard({ product, className }: { product: Product; classNam
               </span>
             ) : (
               <>
-                <span className="price text-2xl font-bold">{formatPrice(product.price)}</span>
+                <span className="price text-2xl font-bold">{price(product.price)}</span>
                 <span className="price block text-xs text-muted-foreground">
-                  {product.totalMg > 0 && `${formatPricePrecise(product.price / product.totalMg)} por mg`}
+                  {product.totalMg > 0 && `${pricePrecise(convert(product.price) / product.totalMg)} por mg`}
                 </span>
               </>
             )}

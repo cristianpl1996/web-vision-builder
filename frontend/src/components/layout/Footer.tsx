@@ -3,9 +3,12 @@ import { Instagram, MessageCircle, ShieldCheck, Truck, CreditCard } from "lucide
 import { Logo } from "@/components/layout/Logo";
 import { STORE } from "@/data/products";
 import { useCatalog } from "@/context/CatalogContext";
+import { useStoreConfig } from "@/services/store";
 
 export function Footer() {
   const { products: PRODUCTS } = useCatalog();
+  const { data: config } = useStoreConfig();
+  const formas = [config?.mercadopago && "Mercado Pago", config?.transferencia && "transferencia"].filter(Boolean).join(" o ");
   return (
     <footer
       className="relative isolate overflow-hidden text-primary-foreground"
@@ -19,7 +22,7 @@ export function Footer() {
           {[
             { icon: Truck, title: "Pedidos en línea", text: "Arma tu carrito y envíalo" },
             { icon: ShieldCheck, title: "Cuenta personal", text: "Consulta tus pedidos cuando quieras" },
-            { icon: CreditCard, title: "Pago seguro", text: "Mercado Pago o WhatsApp" },
+            { icon: CreditCard, title: "Pago seguro", text: formas ? formas.charAt(0).toUpperCase() + formas.slice(1) : "Mercado Pago o transferencia" },
           ].map(({ icon: Icon, title, text }) => (
             <div key={title} className="flex items-center gap-4">
               <div className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-white/10">

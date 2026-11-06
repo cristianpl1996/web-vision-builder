@@ -1,4 +1,5 @@
-"""Las tablas de la tienda. Precios en pesos MXN enteros (la tienda no usa centavos)."""
+"""Las tablas de la tienda. Los productos tienen su precio en pesos MXN enteros (sin centavos);
+cada orden guarda sus montos en SU moneda (MXN o USD enteros) y el tipo de cambio que usó."""
 
 from datetime import UTC, datetime
 
@@ -90,11 +91,16 @@ class Orden(Base):
     subtotal: Mapped[int] = mapped_column(Integer)
     envio: Mapped[int] = mapped_column(Integer)
     total: Mapped[int] = mapped_column(Integer)
-    metodo_pago: Mapped[str] = mapped_column(String(20))  # mercadopago | whatsapp
+    moneda: Mapped[str] = mapped_column(String(3), default="MXN", server_default="MXN")  # MXN | USD
+    tipo_cambio: Mapped[float | None] = mapped_column(Float)  # pesos por dólar usados (solo USD)
+    metodo_pago: Mapped[str] = mapped_column(String(20))  # mercadopago | transferencia
     estado: Mapped[str] = mapped_column(String(20), default="pendiente_pago", index=True)
     transportista: Mapped[str | None] = mapped_column(String(80))
     guia: Mapped[str | None] = mapped_column(String(80))
     pago_url: Mapped[str | None] = mapped_column(Text)
+    # Pago por transferencia: el archivo que sube el cliente (en COMPROBANTES_DIR) y cuándo.
+    comprobante: Mapped[str | None] = mapped_column(String(120))
+    comprobante_en: Mapped[datetime | None] = mapped_column(Fecha)
     creado_en: Mapped[datetime] = mapped_column(Fecha, default=ahora, index=True)
     actualizado_en: Mapped[datetime] = mapped_column(Fecha, default=ahora, onupdate=ahora)
 

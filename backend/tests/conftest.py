@@ -15,6 +15,7 @@ os.environ["DATABASE_URL"] = "postgresql+asyncpg://sinergia:sinergia@localhost:5
 os.environ["DB_SIN_POOL"] = "true"
 os.environ["JWT_SECRET"] = "secreto-de-pruebas-con-mas-de-32-caracteres"
 os.environ["MEDIA_DIR"] = tempfile.mkdtemp(prefix="sinergia-media-")
+os.environ["COMPROBANTES_DIR"] = tempfile.mkdtemp(prefix="sinergia-comprobantes-")
 os.environ["SMTP_HOST"] = ""
 
 import asyncpg  # noqa: E402

@@ -9,16 +9,18 @@ import { ProductsTab } from "./ProductsTab";
 import { SettingsTab } from "./SettingsTab";
 
 const TABS = [
-  { id: "ordenes", label: "Órdenes", icon: ShoppingBag, Component: OrdersTab },
-  { id: "productos", label: "Productos", icon: Package, Component: ProductsTab },
-  { id: "ajustes", label: "Ajustes", icon: Settings, Component: SettingsTab },
+  { id: "ordenes", label: "Órdenes", icon: ShoppingBag, Component: OrdersTab, soloSuperadmin: false },
+  { id: "productos", label: "Productos", icon: Package, Component: ProductsTab, soloSuperadmin: false },
+  { id: "ajustes", label: "Ajustes", icon: Settings, Component: SettingsTab, soloSuperadmin: true },
 ] as const;
 
-/** Panel del superadmin. La pestaña va en la URL (?tab=) para poder volver o compartir el enlace. */
+/** Panel de admin y superadmin. La pestaña va en la URL (?tab=) para poder volver o compartir el enlace.
+ *  Ajustes solo lo ve el superadmin (el backend también lo exige: esconderla no es el control). */
 export default function AdminPage() {
-  const { user } = useAuth();
+  const { user, isSuperadmin } = useAuth();
   const [params, setParams] = useSearchParams();
-  const actual = TABS.find((t) => t.id === params.get("tab")) ?? TABS[0];
+  const tabs = TABS.filter((t) => isSuperadmin || !t.soloSuperadmin);
+  const actual = tabs.find((t) => t.id === params.get("tab")) ?? tabs[0];
 
   useEffect(() => {
     document.title = `${actual.label} · Panel SINERGIA`;
@@ -42,7 +44,7 @@ export default function AdminPage() {
           </div>
         </div>
         <nav className="container -mb-px flex gap-1 overflow-x-auto" aria-label="Secciones del panel">
-          {TABS.map((t) => (
+          {tabs.map((t) => (
             <button
               key={t.id}
               type="button"
